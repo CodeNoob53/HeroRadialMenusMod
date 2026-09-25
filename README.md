@@ -1,7 +1,7 @@
 # Hero Radial Menus
 
 Two mouse-driven radial menus for Valheim: consumables and bow ammunition.
-Version **1.0.0**, plugin ID `com.heromod.valheim.radialmenus`.
+Version **1.1.0**, plugin ID `com.heromod.valheim.radialmenus`.
 
 ## Install
 
@@ -43,12 +43,12 @@ available unless BlockMovement is enabled.
 
 ## Configuration and support
 
-The [complete CFG reference](docs/configuration.md) lists **all 30 settings**,
+The [complete CFG reference](docs/configuration.md) lists **all 33 settings**,
 defaults, examples and reset instructions. Close the game before editing the
 CFG, then restart. Optional editor profiles can override CFG appearance.
 
 If the mod does not load, check `BepInEx/LogOutput.log` for
-`Hero Radial Menus 1.0.0` and errors. Check that BepInEx loads and there is
+`Hero Radial Menus 1.1.0` and errors. Check that BepInEx loads and there is
 only one copy of the DLL. For a misplaced/invisible wheel, temporarily move
 its JSON file out of `BepInEx/config/HeroModUiProfiles` and reset the CFG.
 Issue reports should include game/BepInEx versions, reproduction steps,

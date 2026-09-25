@@ -18,7 +18,7 @@ namespace HeroRadialMenusMod
     {
         public const string PluginGuid    = "com.heromod.valheim.radialmenus";
         public const string PluginName    = "Hero Radial Menus";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.1.0";
 
         internal static BepInEx.Logging.ManualLogSource Log { get; private set; } = null!;
 
@@ -44,6 +44,9 @@ namespace HeroRadialMenusMod
         public static ConfigEntry<float> RadialFrameAlpha { get; private set; } = null!;
         public static ConfigEntry<float> RadialFrameWidth { get; private set; } = null!;
         public static ConfigEntry<bool>  RadialBlockMovement { get; private set; } = null!;
+        public static ConfigEntry<bool>    RadialClickToUse { get; private set; } = null!;
+        public static ConfigEntry<KeyCode> RadialClickKey { get; private set; } = null!;
+        public static ConfigEntry<bool>    RadialConsumeAnimation { get; private set; } = null!;
 
         // --- Arrow wheel ------------------------------------------------------
         public static ConfigEntry<KeyCode> ArrowRadialKey { get; private set; } = null!;
@@ -144,6 +147,15 @@ namespace HeroRadialMenusMod
                 "Заливати фон активного сектора кольором підсвітки (у ванілі фон чорний)");
             RadialBlockMovement = Config.Bind("Radial", "BlockMovement", false,
                 "Повністю блокувати рух персонажа (WASD), поки відкрите радіальне меню (якщо false — дозволено ходити, як у ванільному інвентарі)");
+            RadialClickToUse = Config.Bind("Radial", "ClickToUse", true,
+                "Клік (ClickKey) по слоту одразу застосовує предмет, меню лишається відкритим — " +
+                "можна випити кілька зіль за одне відкриття. Якщо за відкриття був хоч один клік, " +
+                "відпускання клавіші меню просто закриває його, нічого не застосовуючи");
+            RadialClickKey = Config.Bind("Radial", "ClickKey", KeyCode.Mouse0,
+                "Клавіша застосування по кліку (ClickToUse). За замовчуванням Mouse0 (ЛКМ)");
+            RadialConsumeAnimation = Config.Bind("Radial", "ConsumeAnimation", true,
+                "Програвати ванільну анімацію вживання (пиття/їжі) при застосуванні з колеса. " +
+                "false — предмет застосовується без анімації; звук і ефект вживання лишаються");
 
             // "R" is the vanilla Hide-weapon toggle. Short presses stay vanilla;
             // only a hold longer than HoldDelay opens the arrow wheel on top.

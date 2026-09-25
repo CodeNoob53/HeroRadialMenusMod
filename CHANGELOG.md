@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 — unpublished
+
+- Consumable wheel: ClickToUse (default on) uses the clicked slot immediately and keeps
+  the wheel open, so several items can be used in one opening. ClickKey sets the button.
+  A click gives button-like feedback: the slot dips and its sector flashes gold, or red
+  when the game refuses the item (potion cooldown, full stomach).
+- ConsumeAnimation (default on) can turn off the vanilla eat/drink animation for items
+  used from the wheel; the consume sound/effect and vanilla restrictions stay.
+
 ## 1.0.0 — release candidate (unpublished)
 
 - Show/unlock the actual game mouse cursor while a wheel is open, using the

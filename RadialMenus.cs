@@ -211,11 +211,18 @@ namespace HeroRadialMenusMod
         private Color _hoverColor = new Color(0.25f, 0.15f, 0.03f, 0.90f);
         private Color _frameColor = new Color(0.784f, 0.588f, 0.157f, 0.95f);
         private float _frameWidth = 4f;
+        private int   _flashIndex = -1;
+        private float _flashAmount;
+        private Color _flashColor;
 
         public void UpdateState(int segments, int itemCount, float[] sectorWeights,
             float distance, Color unselectedColor, Color emptyColor, Color hoverColor,
-            Color frameColor, float frameWidth)
+            Color frameColor, float frameWidth,
+            int flashIndex = -1, float flashAmount = 0f, Color flashColor = default)
         {
+            _flashIndex = flashIndex;
+            _flashAmount = Mathf.Clamp01(flashAmount);
+            _flashColor = flashColor;
             _segments = Mathf.Max(3, segments);
             _itemCount = itemCount;
             _distance = distance;
@@ -274,6 +281,8 @@ namespace HeroRadialMenusMod
 
                 Color baseCol = (i < _itemCount) ? _unselectedColor : _emptyColor;
                 Color fillColor = Color.Lerp(baseCol, _hoverColor, w);
+                if (i == _flashIndex && _flashAmount > 0f)
+                    fillColor = Color.Lerp(fillColor, _flashColor, _flashAmount);
 
                 AddAnnularSectorFilled(vh, offset, innerRadius, outerRadius, startIn, endIn, startOut, endOut, fillColor);
 
@@ -519,6 +528,12 @@ namespace HeroRadialMenusMod
         {
             if (_root == null) return;
             _root.transform.localPosition = (Vector3)_baseDir * (_midRadius + nudge);
+        }
+
+        public void SetPressScale(float scale)
+        {
+            if (_root == null) return;
+            _root.transform.localScale = Vector3.one * scale;
         }
 
         public void SetActiveAmmo(bool active)
@@ -1195,11 +1210,59 @@ namespace HeroRadialMenusMod
             UpdateMeshAndWidgets();
         }
 
+        // Click feedback: the pressed slot dips and springs back, and its sector
+        // flashes — gold when the item was used, red when the game refused it.
+        private const float PressDuration = 0.22f;
+        private static readonly Color PressOkColor   = new Color(1f, 0.78f, 0.40f, 0.55f);
+        private static readonly Color PressFailColor = new Color(0.85f, 0.12f, 0.08f, 0.60f);
+        private int   _pressIndex = -1;
+        private float _pressStart;
+        private bool  _pressOk;
+        private float _pressFlash;
+
+        public void PressFeedback(int index, bool success)
+        {
+            if (_pressIndex >= 0 && _pressIndex < _slots.Count)
+                _slots[_pressIndex].SetPressScale(1f);
+            _pressIndex = index;
+            _pressStart = Time.unscaledTime;
+            _pressOk = success;
+            UpdateMeshAndWidgets();
+        }
+
+        private void TickPress()
+        {
+            if (_pressIndex < 0) return;
+            float t = (Time.unscaledTime - _pressStart) / PressDuration;
+            bool slotValid = _pressIndex < _slots.Count;
+            if (t >= 1f)
+            {
+                if (slotValid) _slots[_pressIndex].SetPressScale(1f);
+                _pressIndex = -1;
+                _pressFlash = 0f;
+                return;
+            }
+
+            _pressFlash = 1f - t * t;
+            // A refused use gets no "press", only the red flash.
+            if (slotValid)
+                _slots[_pressIndex].SetPressScale(_pressOk ? 1f - 0.18f * Mathf.Sin(t * Mathf.PI) : 1f);
+        }
+
+        private void ResetPress()
+        {
+            if (_pressIndex >= 0 && _pressIndex < _slots.Count)
+                _slots[_pressIndex].SetPressScale(1f);
+            _pressIndex = -1;
+            _pressFlash = 0f;
+        }
+
         private static float HoverFadeStep() => Plugin.RadialHoverSpeed.Value <= 0f
             ? 1f : Time.unscaledDeltaTime / Plugin.RadialHoverSpeed.Value;
 
         private void UpdateMeshAndWidgets()
         {
+            TickPress();
             if (_graphic != null)
             {
                 Color unselectedCol = new Color(0.03f, 0.03f, 0.03f, 0.92f);
@@ -1215,7 +1278,10 @@ namespace HeroRadialMenusMod
                     emptyCol,
                     hoverCol,
                     Plugin.RadialFrameColor,
-                    Plugin.RadialFrameWidth.Value
+                    Plugin.RadialFrameWidth.Value,
+                    _pressIndex,
+                    _pressFlash,
+                    _pressOk ? PressOkColor : PressFailColor
                 );
             }
         }
@@ -1253,6 +1319,7 @@ namespace HeroRadialMenusMod
                 }
                 if (!active)
                 {
+                    ResetPress();
                     _hoverIndex = -1;
                     _highlighterAlpha = 0f;
                     for (int i = 0; i < _sectorWeights.Length; i++)
@@ -1288,6 +1355,8 @@ namespace HeroRadialMenusMod
         private static Vector2 _aim = Vector2.zero;
         private static KeyCode _activeKey = KeyCode.None;
         private static bool    _slowedTime;
+        // Something was used by click during this opening.
+        private static bool    _usedByClick;
 
         public static bool IsOpen => _open && _wheel != null && _wheel.Root != null;
 
@@ -1342,6 +1411,13 @@ namespace HeroRadialMenusMod
             UpdateAim();
             _wheel.UpdateHover(_aim, Plugin.RadialDeadZone.Value, _items);
 
+            var clickKey = Plugin.RadialClickKey.Value;
+            if (Plugin.RadialClickToUse.Value && clickKey != KeyCode.None && clickKey != _activeKey
+                && Plugin.KeyPressed(clickKey))
+            {
+                UseHovered();
+            }
+
             bool shouldClose = false;
             if (_activeKey != KeyCode.None)
             {
@@ -1351,7 +1427,62 @@ namespace HeroRadialMenusMod
             if (shouldClose)
             {
                 _activeKey = KeyCode.None;
-                Close(true);
+                // After a click-use the release only closes: applying the
+                // hovered slot again would double-eat the item just clicked.
+                Close(!_usedByClick);
+            }
+        }
+
+        /// <summary>
+        /// Use the hovered item without closing the wheel. When the stack runs
+        /// out the sectors are rebuilt so the slot picks up the next stack of
+        /// the same item or drops out.
+        /// </summary>
+        private static void UseHovered()
+        {
+            if (_wheel == null || _wheel.Root == null) return;
+            int index = _wheel.HoverIndex;
+            if (index < 0 || index >= _items.Count) return;
+
+            var player = Player.m_localPlayer;
+            var item   = _items[index];
+            if (player == null || item == null) return;
+
+            _usedByClick = true;
+            var inv = player.GetInventory();
+            int before = inv.CountItems(item.m_shared.m_name);
+            UseItem(player, item);
+            // Vanilla gives no result; a shrinking count is the only reliable
+            // sign that the item was actually consumed.
+            _wheel.PressFeedback(index, inv.CountItems(item.m_shared.m_name) < before);
+
+            if (!inv.ContainsItem(item))
+            {
+                RebuildItems();
+                if (_items.Count == 0)
+                    _wheel.SetCustomCenterText("Немає хілок");
+            }
+        }
+
+        /// <summary>
+        /// Vanilla Humanoid.UseItem, minus the "eat" trigger when
+        /// ConsumeAnimation is off. The consume effect (sound) is kept.
+        /// </summary>
+        private static void UseItem(Player player, ItemDrop.ItemData item)
+        {
+            var inv = player.GetInventory();
+            if (Plugin.RadialConsumeAnimation.Value
+                || item.m_shared.m_itemType != ItemDrop.ItemData.ItemType.Consumable)
+            {
+                player.UseItem(inv, item, false);
+                return;
+            }
+
+            if (!inv.ContainsItem(item)) return;
+            if (player.ConsumeItem(inv, item, true))
+            {
+                player.m_consumeItemEffects.Create(player.transform.position, Quaternion.identity,
+                    null, 1f, -1, player.GetZDOID());
             }
         }
 
@@ -1381,11 +1512,12 @@ namespace HeroRadialMenusMod
                 var item   = _items[_wheel.HoverIndex];
                 if (player != null && item != null)
                 {
-                    player.UseItem(player.GetInventory(), item, false);
+                    UseItem(player, item);
                 }
             }
 
             _open = false;
+            _usedByClick = false;
             _activeKey = KeyCode.None;
             if (_wheel != null && _wheel.Root != null) _wheel.SetActive(false);
             RestoreTimeScale();
@@ -1412,6 +1544,7 @@ namespace HeroRadialMenusMod
         public static void ForceClose()
         {
             _open = false;
+            _usedByClick = false;
             _activeKey = KeyCode.None;
             if (_wheel != null && _wheel.Root != null) _wheel.SetActive(false);
             RestoreTimeScale();
