@@ -1,0 +1,35 @@
+# ---- Результати збірки ----
+bin/
+obj/
+*.dll
+*.pdb
+*.mdb
+*.user
+*.suo
+
+# ---- Локальні шляхи до гри ----
+# Environment.props містить шлях до вашої інсталяції Valheim
+# і не має потрапляти в репозиторій (у кожного він свій).
+Environment.props
+
+# ---- Ігрові та BepInEx збірки ----
+# Пропрієтарні файли гри — НІКОЛИ не комітити.
+valheim_Data/
+Managed/
+publicized_assemblies/
+libs/
+*.nupkg
+
+# ---- IDE ----
+.vs/
+.vscode/
+.idea/
+assetripper-export/
+*.csproj.user
+*.sln.DotSettings.user
+
+# ---- Інше ----
+*.log
+.DS_Store
+Thumbs.db
+artifacts/

@@ -1,0 +1,205 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>HeroRadialMenusMod</AssemblyName>
+    <RootNamespace>HeroRadialMenusMod</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>9</LangVersion>
+    <!-- Keep these three and BepInPlugin's version string in step. -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <!-- The game ships no XML docs; drop the noise. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    Path to the Valheim install.
+    Locally: copy Environment.props.example to Environment.props (gitignored).
+    In CI: the workflow lays the references out in $(ReferencePath).
+  -->
+  <Import Project="Environment.props" Condition="Exists('Environment.props')" />
+
+  <PropertyGroup>
+    <!-- Default when the project sits in <Valheim>\ValheimMods\<Mod>\ -->
+    <ValheimDir Condition="'$(ValheimDir)' == ''">$(MSBuildProjectDirectory)\..\..</ValheimDir>
+    <ManagedDir Condition="'$(ManagedDir)' == ''">$(ValheimDir)\valheim_Data\Managed</ManagedDir>
+    <BepInExDir Condition="'$(BepInExDir)' == ''">$(ValheimDir)\BepInEx</BepInExDir>
+    <ReferencePath Condition="'$(ReferencePath)' == ''"></ReferencePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- tools\ holds its own test projects; keep their sources and build
+         output out of the mod assembly. -->
+    <Compile Remove="tools\**" />
+    <EmbeddedResource Remove="tools\**" />
+    <None Remove="tools\**" />
+  </ItemGroup>
+
+  <!-- CI mode: every DLL sits flat in one directory -->
+  <ItemGroup Condition="'$(ReferencePath)' != ''">
+    <Reference Include="BepInEx">
+      <HintPath>$(ReferencePath)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(ReferencePath)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_valheim">
+      <HintPath>$(ReferencePath)\assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_guiutils">
+      <HintPath>$(ReferencePath)\assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath>$(ReferencePath)\assembly_utils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ReferencePath)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ReferencePath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ReferencePath)\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ReferencePath)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ReferencePath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ReferencePath)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ReferencePath)\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(ReferencePath)\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Local mode: references come out of the game install -->
+  <ItemGroup Condition="'$(ReferencePath)' == ''">
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExDir)\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExDir)\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_valheim">
+      <HintPath>$(ManagedDir)\assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_guiutils">
+      <HintPath>$(ManagedDir)\assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath>$(ManagedDir)\assembly_utils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(ManagedDir)\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Встановлення в BepInEx\plugins. Резервна копія попередньої DLL робиться
+    завжди — і при автокопіюванні, і при ручному виклику:
+
+      dotnet build -c Release                                    (копіює автоматично)
+      dotnet msbuild -t:InstallToBepInEx -p:Configuration=Release (те саме вручну)
+
+    Вимкнути автокопіювання для однієї збірки:
+      dotnet build -c Release -p:DeployToBepInEx=false
+  -->
+  <PropertyGroup>
+    <DeployToBepInEx Condition="'$(DeployToBepInEx)' == ''">true</DeployToBepInEx>
+  </PropertyGroup>
+
+  <!--
+    Автокопіювання після збірки.
+
+    При запущеній грі DLL заблокована. Тоді копіювання просто пропускається
+    з попередженням, а збірка проходить: ContinueOnError стоїть на самих
+    <Copy>, бо на <CallTarget> він помилку всередині цілі не перехоплює.
+    Retries=0 — чекати на розблокування немає сенсу, гра тримає файл увесь час.
+  -->
+  <Target Name="AutoDeployToBepInEx" AfterTargets="Build"
+          Condition="'$(DeployToBepInEx)' == 'true' AND Exists('$(BepInExDir)\plugins')">
+    <Copy SourceFiles="$(BepInExDir)\plugins\$(TargetFileName)"
+          DestinationFiles="$(BepInExDir)\plugins\$(TargetFileName).bak"
+          Condition="Exists('$(BepInExDir)\plugins\$(TargetFileName)')"
+          ContinueOnError="WarnAndContinue" Retries="0" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)"
+          DestinationFolder="$(BepInExDir)\plugins"
+          SkipUnchangedFiles="false"
+          ContinueOnError="WarnAndContinue" Retries="0">
+      <Output TaskParameter="CopiedFiles" ItemName="_DeployedDll" />
+    </Copy>
+    <Message Importance="high" Condition="'@(_DeployedDll)' != ''"
+             Text="Встановлено $(TargetFileName) у $(BepInExDir)\plugins" />
+    <Warning Condition="'@(_DeployedDll)' == ''"
+             Text="$(TargetFileName) НЕ встановлено: файл зайнятий (Valheim запущений?). Збірка в $(TargetDir) актуальна — закрий гру й збери ще раз." />
+  </Target>
+
+  <Target Name="InstallToBepInEx">
+    <Error Condition="!Exists('$(BepInExDir)\plugins')"
+           Text="Не знайдено $(BepInExDir)\plugins. Вкажи ValheimDir в Environment.props." />
+    <Copy SourceFiles="$(BepInExDir)\plugins\$(TargetFileName)"
+          DestinationFiles="$(BepInExDir)\plugins\$(TargetFileName).bak"
+          Condition="Exists('$(BepInExDir)\plugins\$(TargetFileName)')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)"
+          DestinationFolder="$(BepInExDir)\plugins"
+          SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="Встановлено $(TargetFileName) у $(BepInExDir)\plugins" />
+  </Target>
+
+</Project>

@@ -1,0 +1,12 @@
+<!--
+  Скопіюйте цей файл у Environment.props і вкажіть свій шлях до Valheim.
+  Environment.props у .gitignore — у кожного розробника він свій.
+
+  Потрібен лише якщо проєкт лежить НЕ всередині <Valheim>\ValheimMods\<Mod>\.
+  Якщо структура стандартна — шлях визначається автоматично.
+-->
+<Project>
+  <PropertyGroup>
+    <ValheimDir>D:\SteamLibrary\steamapps\common\Valheim</ValheimDir>
+  </PropertyGroup>
+</Project>
