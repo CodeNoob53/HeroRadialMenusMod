@@ -1,7 +1,9 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace HeroRadialMenusMod
@@ -18,7 +20,7 @@ namespace HeroRadialMenusMod
     {
         public const string PluginGuid    = "com.heromod.valheim.radialmenus";
         public const string PluginName    = "Hero Radial Menus";
-        public const string PluginVersion = "1.1.0";
+        public const string PluginVersion = "1.1.1";
 
         internal static BepInEx.Logging.ManualLogSource Log { get; private set; } = null!;
 
@@ -88,6 +90,7 @@ namespace HeroRadialMenusMod
             Log = Logger;
 
             BindConfig();
+            WatchConfigFile();
 
             _harmony.PatchAll();
             Logger.LogInfo($"{PluginName} {PluginVersion} завантажено.");
@@ -99,7 +102,75 @@ namespace HeroRadialMenusMod
             // controls blocked, so drop them and close any open wheel first.
             try { QuickHealRadial.ForceClose(); } catch { }
             try { ArrowRadial.ForceClose(); } catch { }
+            _cfgWatcher?.Dispose();
+            _cfgWatcher = null;
             _harmony.UnpatchSelf();
+        }
+
+        // ------------------------------------------------ live CFG reload
+
+        // Edits to the .cfg made while the game runs are picked up without a
+        // restart. The watcher fires on a worker thread, so it only records the
+        // time; the reload itself happens on the main thread in PollConfigReload.
+        private static FileSystemWatcher? _cfgWatcher;
+        private static ConfigFile? _cfg;
+        private static long _cfgChangedTicks;
+
+        // Editors often write a file in several steps; wait until it settles.
+        private static readonly long CfgSettleTicks = TimeSpan.FromMilliseconds(300).Ticks;
+
+        private void WatchConfigFile()
+        {
+            _cfg = Config;
+            try
+            {
+                string path = Config.ConfigFilePath;
+                _cfgWatcher = new FileSystemWatcher(Path.GetDirectoryName(path), Path.GetFileName(path))
+                {
+                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
+                };
+                FileSystemEventHandler onChange = (_, __) =>
+                    System.Threading.Interlocked.Exchange(ref _cfgChangedTicks, DateTime.UtcNow.Ticks);
+                _cfgWatcher.Changed += onChange;
+                _cfgWatcher.Created += onChange;
+                _cfgWatcher.Renamed += (_, __) =>
+                    System.Threading.Interlocked.Exchange(ref _cfgChangedTicks, DateTime.UtcNow.Ticks);
+                _cfgWatcher.EnableRaisingEvents = true;
+            }
+            catch (Exception ex)
+            {
+                _cfgWatcher = null;
+                Logger.LogWarning($"Не вдалося стежити за CFG, зміни діятимуть після перезапуску: {ex.Message}");
+            }
+        }
+
+        /// <summary>Called every HUD frame; reloads the .cfg once it has settled.</summary>
+        public static void PollConfigReload()
+        {
+            long changed = System.Threading.Interlocked.Read(ref _cfgChangedTicks);
+            if (changed == 0 || _cfg == null) return;
+            if (DateTime.UtcNow.Ticks - changed < CfgSettleTicks) return;
+            System.Threading.Interlocked.CompareExchange(ref _cfgChangedTicks, 0, changed);
+
+            // Reload fires SettingChanged, which would save the file straight
+            // back and wake the watcher again.
+            bool save = _cfg.SaveOnConfigSet;
+            _cfg.SaveOnConfigSet = false;
+            try
+            {
+                _cfg.Reload();
+                Log.LogInfo("CFG перечитано з диска.");
+            }
+            catch (Exception ex)
+            {
+                // Usually the editor still holds the file; try again shortly.
+                System.Threading.Interlocked.CompareExchange(ref _cfgChangedTicks, DateTime.UtcNow.Ticks, 0);
+                LogDebug($"CFG ще не вдалося перечитати: {ex.Message}");
+            }
+            finally
+            {
+                _cfg.SaveOnConfigSet = save;
+            }
         }
 
         private void BindConfig()
@@ -241,7 +312,7 @@ namespace HeroRadialMenusMod
             if (InventoryGui.IsVisible()) return false;
             if (Menu.IsVisible()) return false;
             if (Minimap.IsOpen()) return false;
-            if (Console.IsVisible()) return false;
+            if (global::Console.IsVisible()) return false;
             if (Chat.instance != null && Chat.instance.HasFocus()) return false;
             var p = Player.m_localPlayer;
             if (p == null) return false;

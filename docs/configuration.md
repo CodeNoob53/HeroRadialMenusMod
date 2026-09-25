@@ -2,8 +2,10 @@
 
 Файл: `BepInEx/config/com.heromod.valheim.radialmenus.cfg` у папці гри або
 активного профілю менеджера модів. BepInEx створює його після першого запуску.
-Закрийте гру, змініть файл у текстовому редакторі та запустіть гру знову.
-Автоматичного перечитування CFG з диска немає.
+Файл можна редагувати просто під час гри: після збереження мод перечитує його
+за мить (у лозі — «CFG перечитано з диска.»). Виняток — зміщення коліс
+(`HealOffsetX/Y`, `ArrowRadial OffsetX/Y`): вони застосовуються лише при
+завантаженні світу, тож після їх зміни перезайдіть у світ або перезапустіть гру.
 
 Таблиці містять усі 33 параметри із Plugin.BindConfig(). Назви секцій та ключів
 не перекладайте. Дроби пишіть із крапкою: 0.25, не 0,25.
@@ -110,8 +112,8 @@ HoverAlpha = 0.90, OrnamentOffset = 109. Раніше швидкості ані�
 
 ## English quick reference
 
-Tables list every key and default. Edit the generated file while the game is
-closed and restart; decimal values use a dot. Appearance affects both wheels;
+Tables list every key and default. The file is re-read a moment after it is
+saved, even in-game; wheel offsets apply on the next world load. Decimal values use a dot. Appearance affects both wheels;
 SlowMotion and IncludeAllConsumables only affect consumables. SlotSize is the
 item icon size. Radius below 200 falls back to 320. Keep DeadZone positive and
 smaller than Radius. Hover colours require TintBackground. Frame colours also

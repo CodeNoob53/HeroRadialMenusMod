@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1 — unpublished
+
+- Fixed: ConsumeAnimation = false now reliably skips the eat/drink animation. Only the
+  "eat" trigger and the in-hand item are suppressed during the wheel's own UseItem
+  call, so consumption, sound, vanilla checks, inventory and hotbar use stay vanilla.
+- The CFG is re-read from disk a moment after it is saved, so settings apply without
+  restarting the game (wheel offsets still need a world reload).
+- With EnableDebugLogs, each use from the wheel logs the ConsumeAnimation value in effect.
+
 ## 1.1.0 — unpublished
 
 - Consumable wheel: ClickToUse (default on) uses the clicked slot immediately and keeps

@@ -1465,24 +1465,26 @@ namespace HeroRadialMenusMod
         }
 
         /// <summary>
-        /// Vanilla Humanoid.UseItem, minus the "eat" trigger when
-        /// ConsumeAnimation is off. The consume effect (sound) is kept.
+        /// True while the wheel is inside vanilla UseItem with ConsumeAnimation
+        /// off; SuppressEatAnimationPatch drops the "eat" trigger and the
+        /// in-hand item for exactly that call. Everything else in UseItem —
+        /// consumption, sound, vanilla checks — runs untouched.
         /// </summary>
+        internal static bool SuppressEatAnimation { get; private set; }
+
         private static void UseItem(Player player, ItemDrop.ItemData item)
         {
-            var inv = player.GetInventory();
-            if (Plugin.RadialConsumeAnimation.Value
-                || item.m_shared.m_itemType != ItemDrop.ItemData.ItemType.Consumable)
-            {
-                player.UseItem(inv, item, false);
-                return;
-            }
+            bool animate = Plugin.RadialConsumeAnimation.Value;
+            Plugin.LogDebug($"QuickHealRadial: використання {item.m_shared.m_name}, ConsumeAnimation={animate}");
 
-            if (!inv.ContainsItem(item)) return;
-            if (player.ConsumeItem(inv, item, true))
+            SuppressEatAnimation = !animate;
+            try
             {
-                player.m_consumeItemEffects.Create(player.transform.position, Quaternion.identity,
-                    null, 1f, -1, player.GetZDOID());
+                player.UseItem(player.GetInventory(), item, false);
+            }
+            finally
+            {
+                SuppressEatAnimation = false;
             }
         }
 

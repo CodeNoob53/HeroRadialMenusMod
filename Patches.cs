@@ -18,6 +18,24 @@ namespace HeroRadialMenusMod
     }
 
     // =============================================
+    // ConsumeAnimation = false: Humanoid.UseItem is the only place that fires
+    // the "eat" trigger and puts the item in the hand. Both are skipped, but
+    // only for the call the heal wheel makes — inventory and hotbar stay vanilla.
+    // =============================================
+    [HarmonyPatch(typeof(ZSyncAnimation), nameof(ZSyncAnimation.SetTrigger))]
+    public static class SuppressEatAnimationPatch
+    {
+        static bool Prefix(string name) =>
+            !(QuickHealRadial.SuppressEatAnimation && name == "eat");
+    }
+
+    [HarmonyPatch(typeof(Humanoid), "SetUseHandVisual")]
+    public static class SuppressUseHandVisualPatch
+    {
+        static bool Prefix() => !QuickHealRadial.SuppressEatAnimation;
+    }
+
+    // =============================================
     // HUD — both wheels live on the HUD, so they are created and ticked here.
     // =============================================
     [HarmonyPatch(typeof(Hud), "Awake")]
@@ -35,6 +53,9 @@ namespace HeroRadialMenusMod
     {
         static void Postfix()
         {
+            try { Plugin.PollConfigReload(); }
+            catch (System.Exception ex) { Plugin.Log.LogError($"PollConfigReload error: {ex.Message}"); }
+
             // Each wheel is ticked in its own try so a failure in one cannot
             // leave the other stuck open with the controls blocked.
             try
