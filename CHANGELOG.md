@@ -1,41 +1,40 @@
 # Changelog
 
+## 1.2.0 — unpublished
+
+- Item stats window left of both wheels, matching the game's own radial menu:
+  armour and carry weight, then the hovered item's name and tooltip.
+  New settings: ShowItemInfo, ItemInfoScale, ItemInfoOffsetX/Y.
+
 ## 1.1.1 — unpublished
 
-- Fixed: ConsumeAnimation = false now reliably skips the eat/drink animation. Only the
-  "eat" trigger and the in-hand item are suppressed during the wheel's own UseItem
-  call, so consumption, sound, vanilla checks, inventory and hotbar use stay vanilla.
-- The CFG is re-read from disk a moment after it is saved, so settings apply without
-  restarting the game (wheel offsets still need a world reload).
-- With EnableDebugLogs, each use from the wheel logs the ConsumeAnimation value in effect.
+- Fixed: with ConsumeAnimation = false the eat/drink animation could still play.
+  Consumption, sound and game rules are unchanged; inventory and hotbar use keep
+  the animation.
+- CFG changes now apply while the game runs, a moment after the file is saved
+  (wheel positions apply on the next world load).
+- With EnableDebugLogs, each use from the wheel logs the ConsumeAnimation value.
 
 ## 1.1.0 — unpublished
 
-- Consumable wheel: ClickToUse (default on) uses the clicked slot immediately and keeps
-  the wheel open, so several items can be used in one opening. ClickKey sets the button.
-  A click gives button-like feedback: the slot dips and its sector flashes gold, or red
-  when the game refuses the item (potion cooldown, full stomach).
-- ConsumeAnimation (default on) can turn off the vanilla eat/drink animation for items
-  used from the wheel; the consume sound/effect and vanilla restrictions stay.
+- Click-to-use (ClickToUse, ClickKey): click slots to use several consumables in
+  one opening; releasing the key then just closes the wheel.
+- Click feedback: a used item's slot dips and flashes gold; a refused one
+  (potion still active, too full to eat) flashes red.
+- ConsumeAnimation: turn off the eat/drink animation for items used from the
+  wheel; sound and game rules stay.
 
-## 1.0.0 — release candidate (unpublished)
+## 1.0.0 — unpublished
 
-- Show/unlock the actual game mouse cursor while a wheel is open, using the
-  vanilla ZCursor API. Selection follows its position relative to the wheel.
-- The chevron indicates mouse direction; empty sectors cannot be hovered or selected.
-- Removed the extra one-second consumable lockout and blanket icon dimming.
-  Vanilla item-use restrictions remain intact.
-
-- Unified diagnostic logging under EnableDebugLogs (false by default).
-  The old LogInput setting is ignored; startup messages, warnings and errors remain enabled.
-
-- Standalone consumable and bow-ammunition radial menus; no HeroEquipmentMod dependency.
-- Independent optional editor profiles for both wheels.
-- Release audit connected SlotSize, HoverFadeSeconds, EmptySlotAlpha,
-  HoverColorR/G/B, HoverAlpha, TintBackground and OrnamentOffset to rendering.
-  Existing CFGs now affect appearance; see the configuration reference.
-- Removed unused singleton, wheel accessors, profile helpers and logger locals.
-  Removed the hidden legacy hover-colour replacement.
-- Repaired standalone profile-test compilation with optional debug logging.
-- Reset cursor tip size when its profile override is removed.
-- Added user/developer documentation, MIT license and candidate packaging.
+- Consumable wheel (hold Mouse3): food, meads and potions around the screen
+  centre; point and release to use, or return to the centre to cancel.
+- Arrow wheel (hold R with a bow): pick the ammunition to load; a short R press
+  keeps the game's hide-weapon action and a hidden bow is re-equipped.
+- The game mouse cursor is shown while a wheel is open; empty sectors cannot be
+  selected. Camera and combat pause while a wheel is open; walking can be
+  blocked with BlockMovement.
+- Appearance settings: radius, slot size, dead zone, colours, frame, ornament,
+  hover fade and wheel positions.
+- Optional editor profiles for each wheel.
+- Experimental slow motion for single player.
+- Diagnostic logging behind EnableDebugLogs.

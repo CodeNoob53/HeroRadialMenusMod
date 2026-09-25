@@ -20,7 +20,7 @@ namespace HeroRadialMenusMod
     {
         public const string PluginGuid    = "com.heromod.valheim.radialmenus";
         public const string PluginName    = "Hero Radial Menus";
-        public const string PluginVersion = "1.1.1";
+        public const string PluginVersion = "1.2.0";
 
         internal static BepInEx.Logging.ManualLogSource Log { get; private set; } = null!;
 
@@ -49,6 +49,10 @@ namespace HeroRadialMenusMod
         public static ConfigEntry<bool>    RadialClickToUse { get; private set; } = null!;
         public static ConfigEntry<KeyCode> RadialClickKey { get; private set; } = null!;
         public static ConfigEntry<bool>    RadialConsumeAnimation { get; private set; } = null!;
+        public static ConfigEntry<bool>    ShowItemInfo { get; private set; } = null!;
+        public static ConfigEntry<float>   ItemInfoScale { get; private set; } = null!;
+        public static ConfigEntry<float>   ItemInfoOffsetX { get; private set; } = null!;
+        public static ConfigEntry<float>   ItemInfoOffsetY { get; private set; } = null!;
 
         // --- Arrow wheel ------------------------------------------------------
         public static ConfigEntry<KeyCode> ArrowRadialKey { get; private set; } = null!;
@@ -227,6 +231,15 @@ namespace HeroRadialMenusMod
             RadialConsumeAnimation = Config.Bind("Radial", "ConsumeAnimation", true,
                 "Програвати ванільну анімацію вживання (пиття/їжі) при застосуванні з колеса. " +
                 "false — предмет застосовується без анімації; звук і ефект вживання лишаються");
+            ShowItemInfo = Config.Bind("Radial", "ShowItemInfo", true,
+                "Показувати ліворуч від колеса вікно статів предмета під курсором, як у ванільному " +
+                "радіальному меню (броня, вага, назва й опис). Діє на обидва колеса");
+            ItemInfoScale = Config.Bind("Radial", "ItemInfoScale", 1f,
+                "Масштаб вікна статів предмета (0.3..3)");
+            ItemInfoOffsetX = Config.Bind("Radial", "ItemInfoOffsetX", 0f,
+                "Додаткове зміщення вікна статів по X; від'ємне — лівіше");
+            ItemInfoOffsetY = Config.Bind("Radial", "ItemInfoOffsetY", 0f,
+                "Додаткове зміщення вікна статів по Y; додатне — вище");
 
             // "R" is the vanilla Hide-weapon toggle. Short presses stay vanilla;
             // only a hold longer than HoldDelay opens the arrow wheel on top.

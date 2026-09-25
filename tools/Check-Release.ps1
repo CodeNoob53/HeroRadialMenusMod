@@ -1,7 +1,6 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $plugin = Get-Content -LiteralPath (Join-Path $projectRoot 'Plugin.cs') -Raw -Encoding UTF8
-$guide = Get-Content -LiteralPath (Join-Path $projectRoot 'docs/configuration.md') -Raw -Encoding UTF8
 [xml]$project = Get-Content -LiteralPath (Join-Path $projectRoot 'HeroRadialMenusMod.csproj') -Raw
 $versionMatch = [regex]::Match($plugin, 'PluginVersion\s*=\s*"([^"]+)"')
 if (!$versionMatch.Success) { throw 'PluginVersion was not found.' }
@@ -12,30 +11,45 @@ foreach ($property in 'Version', 'AssemblyVersion', 'FileVersion') {
 }
 $bindings = [regex]::Matches($plugin, 'Config\.Bind\("([^"]+)",\s*"([^"]+)",\s*([^,\r\n]+),')
 if ($bindings.Count -eq 0) { throw 'No configuration bindings found.' }
-$rows = @{}
-$section = ''
-foreach ($line in ($guide -split '\r?\n')) {
-    if ($line -match '^## \[([^\]]+)\]') { $section = $Matches[1] }
-    if ($line -match '^\| \x60([^\x60]+)\x60 \| \x60([^\x60]+)\x60 \|') {
-        $id = "$section/$($Matches[1])"
-        if ($rows.ContainsKey($id)) { throw "Duplicate configuration row: $id" }
-        $rows[$id] = $Matches[2]
+# Both language versions of the settings reference must list every key with
+# its real default, and nothing else.
+foreach ($lang in 'en', 'uk') {
+    $guide = Get-Content -LiteralPath (Join-Path $projectRoot "docs/$lang/configuration.md") -Raw -Encoding UTF8
+    $rows = @{}
+    $section = ''
+    foreach ($line in ($guide -split '\r?\n')) {
+        if ($line -match '^## \[([^\]]+)\]') { $section = $Matches[1] }
+        if ($line -match '^\| `([^`]+)` \| `([^`]+)` \|') {
+            $id = "$section/$($Matches[1])"
+            if ($rows.ContainsKey($id)) { throw "Duplicate configuration row in $lang : $id" }
+            $rows[$id] = $Matches[2]
+        }
     }
+    foreach ($binding in $bindings) {
+        $id = $binding.Groups[1].Value + '/' + $binding.Groups[2].Value
+        $expected = $binding.Groups[3].Value.Trim() -replace '^KeyCode\.', '' -replace 'f$', ''
+        if (!$rows.ContainsKey($id)) { throw "Missing configuration documentation ($lang): $id" }
+        if ($rows[$id] -ne $expected) { throw "Wrong documented default ($lang) for $id : expected $expected, found $($rows[$id])" }
+    }
+    if ($rows.Count -ne $bindings.Count) { throw "docs/$lang/configuration.md contains stale configuration entries." }
 }
-foreach ($binding in $bindings) {
-    $id = $binding.Groups[1].Value + '/' + $binding.Groups[2].Value
-    $expected = $binding.Groups[3].Value.Trim() -replace '^KeyCode\.', '' -replace 'f$', ''
-    if (!$rows.ContainsKey($id)) { throw "Missing configuration documentation: $id" }
-    if ($rows[$id] -ne $expected) { throw "Wrong documented default for $id : expected $expected, found $($rows[$id])" }
+# Both READMEs: setting count and the version badge.
+$count = $bindings.Count
+$readmes = @{
+    'README.md'    = "all $count settings"
+    'README.uk.md' = "всі $count параметрів"
 }
-if ($rows.Count -ne $bindings.Count) { throw 'Documentation contains stale configuration entries.' }
-$readme = Get-Content -LiteralPath (Join-Path $projectRoot 'README.md') -Raw -Encoding UTF8
-if (!$readme.Contains("all $($bindings.Count) settings")) { throw 'README setting count is stale.' }
+foreach ($name in $readmes.Keys) {
+    $readme = Get-Content -LiteralPath (Join-Path $projectRoot $name) -Raw -Encoding UTF8
+    if (!$readme.Contains($readmes[$name])) { throw "$name setting count is stale." }
+    if (!$readme.Contains("badge/version-$version-")) { throw "$name version badge is stale." }
+}
 $markdown = @(
     (Join-Path $projectRoot 'README.md'),
+    (Join-Path $projectRoot 'README.uk.md'),
     (Join-Path $projectRoot 'CONTRIBUTING.md'),
     (Join-Path $projectRoot 'CHANGELOG.md')
-) + @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'docs') -Filter '*.md' | ForEach-Object { $_.FullName })
+) + @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'docs') -Filter '*.md' -Recurse | ForEach-Object { $_.FullName })
 foreach ($path in $markdown) {
     $body = Get-Content -LiteralPath $path -Raw -Encoding UTF8
     foreach ($link in [regex]::Matches($body, '\[[^\]]+\]\(([^)]+)\)')) {

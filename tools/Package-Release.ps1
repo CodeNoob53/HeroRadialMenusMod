@@ -1,4 +1,4 @@
-param([string]$ValheimDir)
+﻿param([string]$ValheimDir)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $projectRoot
@@ -15,15 +15,20 @@ try {
     $candidateId = (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 6)
     $candidate = Join-Path $projectRoot "artifacts/$candidateId"
     $stage = Join-Path $candidate 'package'
-    $pluginDir = Join-Path $stage 'BepInEx/plugins/HeroRadialMenus'
+    $pluginDir = Join-Path $stage 'BepInEx/plugins'
     New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $stage 'docs') -Force | Out-Null
+    $docNames = 'configuration.md', 'radial-surfaces.md', 'release-readiness.md'
+    foreach ($lang in 'en', 'uk') {
+        New-Item -ItemType Directory -Path (Join-Path $stage "docs/$lang") -Force | Out-Null
+    }
     Copy-Item -LiteralPath 'bin/Release/net472/HeroRadialMenusMod.dll' -Destination $pluginDir
-    foreach ($name in 'README.md', 'LICENSE', 'CHANGELOG.md', 'CONTRIBUTING.md') {
+    foreach ($name in 'README.md', 'README.uk.md', 'LICENSE', 'CHANGELOG.md', 'CONTRIBUTING.md') {
         Copy-Item -LiteralPath $name -Destination $stage
     }
-    foreach ($name in 'configuration.md', 'radial-surfaces.md', 'release-readiness.md') {
-        Copy-Item -LiteralPath (Join-Path 'docs' $name) -Destination (Join-Path $stage 'docs')
+    foreach ($lang in 'en', 'uk') {
+        foreach ($name in $docNames) {
+            Copy-Item -LiteralPath "docs/$lang/$name" -Destination (Join-Path $stage "docs/$lang")
+        }
     }
     $zip = Join-Path $candidate "HeroRadialMenus-$version-manual.zip"
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
@@ -32,10 +37,12 @@ try {
     try {
         $entries = @($archive.Entries | Where-Object { $_.Name } | ForEach-Object { $_.FullName.Replace('\', '/') })
         $expected = @(
-            'BepInEx/plugins/HeroRadialMenus/HeroRadialMenusMod.dll',
-            'README.md', 'LICENSE', 'CHANGELOG.md', 'CONTRIBUTING.md',
-            'docs/configuration.md', 'docs/radial-surfaces.md', 'docs/release-readiness.md'
+            'BepInEx/plugins/HeroRadialMenusMod.dll',
+            'README.md', 'README.uk.md', 'LICENSE', 'CHANGELOG.md', 'CONTRIBUTING.md'
         )
+        foreach ($lang in 'en', 'uk') {
+            foreach ($name in $docNames) { $expected += "docs/$lang/$name" }
+        }
         if (@(Compare-Object $expected $entries).Count -ne 0) { throw 'Unexpected archive contents.' }
     } finally { $archive.Dispose() }
     $hash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()

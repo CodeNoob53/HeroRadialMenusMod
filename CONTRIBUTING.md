@@ -3,7 +3,7 @@
 ## Prerequisites
 
 .NET Framework 4.7.2 target (net472), C# 9, BepInEx 5 and local Valheim
-assemblies. The audit used Windows and .NET SDK 8.0.425. Install the .NET
+assemblies. Developed on Windows with .NET SDK 8.0. Install the .NET
 Framework 4.7.2 targeting pack if the SDK reports missing reference assemblies.
 Do not redistribute game/BepInEx DLLs with the plugin.
 
@@ -35,8 +35,9 @@ dotnet msbuild -t:InstallToBepInEx -p:Configuration=Release
 ```
 
 Close the game first. Automatic deployment reports a locked destination as a
-warning: build success is not proof of installation. Avoid duplicate DLLs when
-switching between developer root-level deployment and the release subfolder.
+warning: build success is not proof of installation. Local builds and the
+release ZIP both place the DLL directly in `BepInEx/plugins`, so they replace
+each other rather than leaving duplicates.
 
 ProfileTests runs production JSON parsing, polling/resolution and dynamic
 visibility/tint merge. It cannot construct Unity objects. Existing source
@@ -47,9 +48,10 @@ rendering, Harmony hooks, input or actual item actions in-game.
 
 | File | Responsibility |
 |---|---|
-| Plugin.cs | BepInEx lifecycle, 30 CFG bindings, input helpers and hotkey guards |
-| Patches.cs | Harmony HUD updates, input suppression, death/scene cleanup |
-| RadialMenus.cs | Sprite lookup, procedural mesh/slots, shared wheel and both state machines |
+| Plugin.cs | BepInEx lifecycle, CFG bindings, live CFG reload, input helpers and hotkey guards |
+| Patches.cs | Harmony HUD updates, input suppression, eat-animation suppression, death/scene cleanup |
+| RadialMenus.cs | Sprite lookup, procedural mesh/slots, click feedback, shared wheel and both state machines |
+| ItemInfoPanel.cs | Item stats window, cloned from the game's radial InventoryInfo |
 | LayerProfile.cs | Per-surface file cache and property resolution/application |
 | NodeBaseline.cs | Capture/restore of static UI properties |
 | DynamicOverride.cs | Combining live visibility/colour with profiles |
@@ -62,19 +64,27 @@ Public implementation classes are not a versioned third-party API.
 
 Item lists are rebuilt on opening, deduplicated by shared name and capped at
 16. The visible game mouse position is converted into wheel-local coordinates for
-selection; releasing the opening key applies/cancels. There is no mod-added
-consumable cooldown; normal game restrictions still apply.
+selection; releasing the opening key applies/cancels. With ClickToUse, ClickKey
+uses the hovered consumable immediately and the release then only closes; the
+list is rebuilt when a stack runs out. Items go through the game's own
+Humanoid.UseItem, so its restrictions apply; with ConsumeAnimation off, only
+the "eat" trigger and the in-hand visual are suppressed for that one call.
+
+The CFG file is watched with a FileSystemWatcher; the reload itself runs on
+the main thread from the HUD update, with SaveOnConfigSet disabled so it cannot
+trigger itself. Wheel offsets are read only when the wheel is created.
 Arrow selection tracks equipped/hidden bows and remembers a bow for 1.5
 seconds to tolerate vanilla R. PickDelay is visual confirmation after returning
 control to the player.
 
 Profile order: base layout, CFG, JSON. Static nodes restore baseline before
 new overrides. Dynamic nodes merge values while rendering; restoring moving
-transforms would break aiming. See [profile contract](docs/radial-surfaces.md).
+transforms would break aiming. See [profile format](docs/en/radial-surfaces.md).
 
 ## Release workflow
 
-Update docs/configuration.md and README's setting count whenever Config.Bind
+Update docs/en/configuration.md, docs/uk/configuration.md and the setting
+count in README.md / README.uk.md whenever Config.Bind
 entries change. Keep PluginVersion, Version, AssemblyVersion and FileVersion
 consistent. Do not install a sample CFG over user-owned settings.
 
@@ -85,7 +95,7 @@ powershell -NoProfile -File tools/Package-Release.ps1
 Packaging builds and installs the DLL locally, runs tests and contract checks, then
 creates a new candidate directory in artifacts/ with only the DLL and selected
 documentation. Previous candidates are preserved. The ZIP targets manual/Nexus
-distribution, not Thunderstore. Complete the [release checklist](docs/release-readiness.md).
+distribution, not Thunderstore. Complete the [release checklist](docs/en/release-readiness.md).
 
 MIT covers project code/documentation. Never package game DLLs, extracted
 game assets, private configuration, logs or credentials.

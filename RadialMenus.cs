@@ -626,6 +626,7 @@ namespace HeroRadialMenusMod
         private RectTransform? _cursorTip;
         private Image? _cursorImage;
         private Text? _centerLabel;
+        private readonly ItemInfoPanel _info = new ItemInfoPanel();
         private readonly List<ProceduralSlotWidget> _slots = new List<ProceduralSlotWidget>();
 
         private int _segments = 8;
@@ -985,6 +986,12 @@ namespace HeroRadialMenusMod
             float outerRadius = _distance + 94f;
             float midRadius = (innerRadius + outerRadius) * 0.5f;
 
+            // Not a profile node on purpose: NodeBaseline would snapshot and
+            // restore its visibility, which the panel toggles at runtime.
+            // Position and size come from the ItemInfo* CFG keys instead.
+            if (_info.EnsureCreated(_root.transform))
+                _info.Layout(outerRadius);
+
             for (int i = 0; i < _slots.Count; i++)
             {
                 if (i < _segments)
@@ -1062,11 +1069,15 @@ namespace HeroRadialMenusMod
                     _sectorWeights[i] = Mathf.MoveTowards(_sectorWeights[i], 0f, HoverFadeStep());
                 if (_cursorRoot != null) _cursorRoot.gameObject.SetActive(false);
                 if (_highlighter != null) _highlighter.gameObject.SetActive(false);
+                _info.SetItem(null);
+                _info.Tick();
                 UpdateMeshAndWidgets();
                 return;
             }
 
             _hoverIndex = RadialSelection.HoverIndex(aim.x, aim.y, deadZone, _segments, items.Count);
+            _info.SetItem(_hoverIndex >= 0 && _hoverIndex < items.Count ? items[_hoverIndex] : null);
+            _info.Tick();
 
             // Плавні анімації переходу для кожного сегмента
             const float nudgeDist = 20f;
@@ -1313,12 +1324,14 @@ namespace HeroRadialMenusMod
                 GameCamera.instance?.UpdateMouseCapture();
                 if (active)
                 {
+                    _info.Show();
                     _openedFrame = Time.frameCount;
                     if (ZInput.IsMouseActive())
                         ZInput.SetMousePosition(RectTransformUtility.WorldToScreenPoint(EventCamera, _root.transform.position));
                 }
                 if (!active)
                 {
+                    _info.Hide();
                     ResetPress();
                     _hoverIndex = -1;
                     _highlighterAlpha = 0f;

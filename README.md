@@ -1,69 +1,146 @@
 # Hero Radial Menus
 
-Two mouse-driven radial menus for Valheim: consumables and bow ammunition.
-Version **1.1.1**, plugin ID `com.heromod.valheim.radialmenus`.
+**English** · [Українська](README.uk.md)
 
-## Install
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Valheim](https://img.shields.io/badge/Valheim-1.0.15-orange)
+![BepInEx](https://img.shields.io/badge/BepInEx-5.4.23-green)
+![Client-side](https://img.shields.io/badge/side-client--only-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-yellow)
 
-1. Install BepInEx 5 for Valheim. This candidate builds against BepInEx
-   5.4.23.3 / BepInExPack Valheim 5.4.2333 and assemblies from an installation
-   whose log reports Valheim 1.0.15. In-game testing of this candidate is pending.
-2. Close Valheim. Extract the release ZIP into the Valheim directory to obtain
-   `BepInEx/plugins/HeroRadialMenus/HeroRadialMenusMod.dll`.
-3. Remove any old copy of `HeroRadialMenusMod.dll` from other plugin folders
-   first, including the root of `BepInEx/plugins`. Keep only one DLL.
-4. Start the game once to generate
-   `BepInEx/config/com.heromod.valheim.radialmenus.cfg`.
+<!-- Preview image goes here: docs/images/preview.png -->
 
-For a mod manager, use its profile's BepInEx directory. The ZIP targets manual
-installation; mod-manager installation still needs validation. Install on the
-game client; dedicated-server operation is not a tested release target.
+Hero Radial Menus adds two circular selection wheels to Valheim — one for
+potions and food, one for arrows — so you can heal or swap ammunition in the
+middle of a fight without opening the inventory or juggling the hotbar.
+
+The wheels are built on the look of Valheim's own radial menu: the same
+ornament, pointer, fonts and item stats window, so they feel like part of the
+game. Think of them as an improved, mouse-first version of the vanilla menu:
+a fixed item order you can learn by feel, several items per opening, clear
+feedback on every use, and a live config.
+
+Plugin ID `com.heromod.valheim.radialmenus`.
+
+## Contents
+
+- [Main features](#main-features)
+- [Controls](#controls)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Compatibility and limits](#compatibility-and-limits)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Shout outs](#shout-outs)
+
+## Main features
+
+- **Consumable wheel with a fixed order.** Hold a key to see every mead,
+  potion and food you carry (up to 16 different items). The order never
+  shuffles, so muscle memory works in the heat of battle:
+  1. Health meads (Major, Medium, Minor)
+  2. Stamina meads
+  3. Eitr meads
+  4. Resistance meads (Poison, Frost, Fire)
+  5. Other meads (Tasty mead, etc.)
+  6. Food, best first (health + stamina)
+- **Use several at once.** Click slots to drink a health and a stamina mead in
+  one opening. A used slot dips like a button and flashes gold; if the game
+  refuses (effect still active, too full to eat) it flashes red.
+- **Item stats at a glance.** A window left of the wheel shows the hovered
+  item's full tooltip plus your armour and carry weight — the same window the
+  game's radial menu uses.
+- **Arrow wheel.** Hold R with a bow to pick any ammunition that bow can fire.
+  A short R press still hides your weapon as usual, and a bow hidden that way
+  is re-equipped.
+- **Live tracking.** Icons and stack counts always match your inventory.
+- **Optional eat/drink animation.** Turn it off for items used from the wheel;
+  sound and all game rules stay.
+- **Highly configurable.** Hotkeys, dead zone, movement lock, colours, sizes
+  and more. Changes apply as soon as you save the config — no restart.
 
 ## Controls
 
 | Action | Default |
 |---|---|
 | Consumable wheel | Hold Mouse3 (a mouse side button) |
-| Arrow wheel | Hold R for 0.25 seconds with a bow equipped/recently hidden |
-| Select | Move the mouse toward a sector, then release the opening key |
-| Cancel | Return to the centre dead zone, then release the key |
+| Arrow wheel | Hold R for 0.25 seconds with a bow equipped |
+| Aim | Move the mouse toward a sector |
+| Use the selected item | Release the key |
+| Use several consumables | Left-click each slot; release the key to close |
+| Cancel | Return to the centre, then release the key |
 
-The game mouse cursor is visible while selecting. The small arrow inside the
-wheel indicates its direction. Empty sectors are inactive.
+Camera look and combat pause while a wheel is open; walking stays available
+unless `BlockMovement` is enabled. If your mouse has no side buttons, set
+`RadialKey` to any other key.
 
-A short R press retains the game's hide-weapon action. The arrow wheel
-restores the hidden bow on normal close. Controller-stick aiming is not
-implemented. Rebind Mouse3 if your mouse has no side buttons.
+The arrow wheel waits 0.25 seconds (`HoldDelay`) before opening only so that a
+short R press still hides your weapon. If you move the arrow wheel to a key the
+game does not use (`Key` or `KeySecondary`), set `HoldDelay = 0` and it opens
+instantly. The delay applies to both arrow wheel keys.
 
-Each wheel shows up to 16 distinct item names. Consumables include food and
-meads, not only health potions. Normal game restrictions still apply.
-The arrow wheel filters ammunition for the current bow. Camera look and
-combat actions are blocked while a wheel is open; keyboard walking remains
-available unless BlockMovement is enabled.
+## Requirements
 
-## Configuration and support
+- [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
+  (BepInEx 5). Built and tested with BepInEx 5.4.23.3 / BepInExPack Valheim
+  5.4.2333 on Valheim 1.0.15.
 
-The [complete CFG reference](docs/configuration.md) lists **all 33 settings**,
-defaults, examples and reset instructions. Edits to the CFG apply while the game
-runs; wheel offsets need a world reload. Optional editor profiles can override CFG appearance.
+## Installation
 
-If the mod does not load, check `BepInEx/LogOutput.log` for
-`Hero Radial Menus 1.1.1` and errors. Check that BepInEx loads and there is
-only one copy of the DLL. For a misplaced/invisible wheel, temporarily move
-its JSON file out of `BepInEx/config/HeroModUiProfiles` and reset the CFG.
-Issue reports should include game/BepInEx versions, reproduction steps,
-relevant logs and the CFG. Debug logs are disabled by default.
+1. Install BepInExPack Valheim: follow the installation instructions on
+   [its page](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/).
+2. Close Valheim. Extract the release ZIP into the Valheim folder, so the DLL
+   ends up at `BepInEx/plugins/HeroRadialMenusMod.dll`.
+3. Start the game once to create
+   `BepInEx/config/com.heromod.valheim.radialmenus.cfg`.
 
-To uninstall, close the game and remove its DLL. Remove its CFG/profiles
-separately if desired. This mod defines no new items and writes no custom
-world/player-save data.
+With a mod manager, use its profile's BepInEx folder.
 
-## Development and release
+## Configuration
 
-- [Developer guide](CONTRIBUTING.md): setup, builds, tests and architecture.
-- [Editor profile contract](docs/radial-surfaces.md).
-- [Release audit/checklist](docs/release-readiness.md).
+The [complete settings reference](docs/en/configuration.md) lists
+**all 37 settings**, their defaults and examples. Changes apply as soon as the
+file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
+`[ArrowRadial] OffsetX/Y`) apply on the next world load.
+
+## Compatibility and limits
+
+- Client-side only: works on any server, and the server does not need it.
+- Mouse only; controller sticks cannot aim the wheels.
+- Up to 16 different items per wheel.
+- Three short labels are in Ukrainian: the "no items" messages of the empty
+  wheels and the "active" tag next to the arrows currently loaded.
+- Normal game rules apply: potion cooldowns, full stomach, ammunition that
+  fits the bow.
+- The experimental `SlowMotion` option is for single player only.
+- The mod adds no items and writes nothing to worlds or characters.
+
+## Troubleshooting
+
+- **The mod does not load.** Look in `BepInEx/LogOutput.log` for
+  `Hero Radial Menus 1.2.0` and any errors, and make sure there is only one copy
+  of the DLL.
+- **A wheel is misplaced or looks wrong.** Reset the config: close the game,
+  rename the file and let the game create a new one with defaults.
+- **Reporting a bug.** Include the game and BepInEx versions, steps to
+  reproduce, the log and the config; set `EnableDebugLogs = true` for detailed
+  logging.
+- **Uninstalling.** Close the game and delete the DLL; remove the config too
+  if you like.
+
+## Development
+
+- [Developer guide](CONTRIBUTING.md): setup, builds, tests and code map.
+- [Editor profile format](docs/en/radial-surfaces.md): JSON profiles made with
+  Valheim UI Editor, the author's visual UI editor.
+- [Release checklist](docs/en/release-readiness.md).
 - [Changelog](CHANGELOG.md).
 
-Licensed under [MIT](LICENSE). Game assemblies/assets are not included and
+## Shout outs
+
+Thanks to Iron Gate Studio for Valheim, the BepInEx and Harmony teams, and the
+Valheim modding community for their tools and support.
+
+Licensed under [MIT](LICENSE). Game assemblies and assets are not included and
 are not covered by this license.
