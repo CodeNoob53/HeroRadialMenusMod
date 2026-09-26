@@ -31,15 +31,15 @@ jobs:
         shell: pwsh
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
       - name: Cache NuGet references
         id: cache-refs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: nuget-refs
           key: refs-${{ env.UNITY_MODULES }}-${{ env.BEPINEX_BASELIB }}-${{ env.HARMONYX }}
@@ -92,7 +92,7 @@ jobs:
         run: ./tools/Package-Release.ps1 -ReferencePath "${{ github.workspace }}/refs"
 
       - name: Upload ZIP
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: HeroRadialMenus
           path: |
@@ -120,7 +120,7 @@ jobs:
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: release-notes.md
           files: |
