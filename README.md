@@ -3,7 +3,7 @@
 **English** · [Українська](README.uk.md)
 
 ![Version](https://img.shields.io/badge/version-1.3.1-blue)
-![Valheim](https://img.shields.io/badge/Valheim-1.0.15-orange)
+![Valheim](https://img.shields.io/badge/Valheim-1.0.16-orange)
 ![BepInEx](https://img.shields.io/badge/BepInEx-5.4.23-green)
 ![Client-side](https://img.shields.io/badge/side-client--only-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
@@ -88,7 +88,7 @@ do something in the game's controls: put the arrow wheel on a free key
 
 - [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
   (BepInEx 5). Built and tested with BepInEx 5.4.23.3 / BepInExPack Valheim
-  5.4.2333 on Valheim 1.0.15.
+  5.4.2333 on Valheim 1.0.16.
 
 ## Installation
 

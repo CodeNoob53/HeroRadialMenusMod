@@ -17,7 +17,11 @@ creates a ZIP with a SHA-256 sidecar in `artifacts/`.
 Keep `README.md` / `README.uk.md` and `docs/en` / `docs/uk` in step: every
 change to features or settings goes into both languages.
 
-Record the .NET SDK, BepInEx and Valheim versions the build used.
+Record the .NET SDK, BepInEx and Valheim versions the build used. After a
+game update, regenerate `lib/` with `tools/Update-GameRefs.ps1` so CI builds
+against the same game version. Publish by tagging `vX.Y.Z` (see
+CONTRIBUTING.md); the CHANGELOG heading must carry the release date, not
+"unpublished".
 
 ## In-game
 

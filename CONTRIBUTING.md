@@ -98,5 +98,45 @@ creates a new candidate directory in artifacts/ with only the DLL and selected
 documentation. Previous candidates are preserved. The ZIP targets manual/Nexus
 distribution, not Thunderstore. Complete the [release checklist](docs/en/release-readiness.md).
 
+## CI and GitHub releases
+
+[.github/workflows/build.yml](.github/workflows/build.yml) builds the mod on
+GitHub without the game installed. Game assemblies come from `lib/`: reference
+assemblies made from the local game with JetBrains Refasmer. They keep only the
+public API (types and member signatures, no method bodies), like the
+ValheimGameLibs NuGet package, which is too old for this mod (no `ZCursor`,
+no `ZInput.pointerPosition`). Unity modules, BepInEx and Harmony come from
+NuGet. `lib/GAME_VERSION.txt` records the game build they were made from.
+
+After a Valheim update, regenerate and commit `lib/`:
+
+```powershell
+dotnet tool install -g JetBrains.Refasmer.CliTool   # once
+powershell -NoProfile -File tools/Update-GameRefs.ps1
+```
+
+Every push and pull request builds with
+`Package-Release.ps1 -ReferencePath refs`, runs the documentation/version
+checks and uploads the ZIP as an artifact. Profile tests need the real Unity
+runtime, so they run only in local packaging.
+
+To publish a release:
+
+1. Bump the version (PluginVersion, Version, AssemblyVersion, FileVersion and
+   the README badges); `Check-Release.ps1` checks that they agree.
+2. In CHANGELOG.md replace `— unpublished` in that version's heading with the
+   release date. The workflow refuses to release a section still marked
+   unpublished.
+3. Commit, then tag and push:
+
+   ```powershell
+   git tag v1.3.1
+   git push origin v1.3.1
+   ```
+
+The tag must equal `v` + PluginVersion. The workflow then creates a GitHub
+Release with the ZIP, its SHA-256 and that CHANGELOG section as the notes.
+
 MIT covers project code/documentation. Never package game DLLs, extracted
-game assets, private configuration, logs or credentials.
+game assets, private configuration, logs or credentials. `lib/` holds only
+reference assemblies, used for compiling and never packaged.

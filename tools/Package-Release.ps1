@@ -1,14 +1,23 @@
-﻿param([string]$ValheimDir)
+﻿# -ValheimDir    build against a game install elsewhere (local builds).
+# -ReferencePath build against a flat folder of reference DLLs instead (CI):
+#                lib/ plus the Unity/BepInEx/Harmony NuGet packages. Profile
+#                tests need the real Unity runtime and are skipped then.
+param([string]$ValheimDir, [string]$ReferencePath)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $projectRoot
 try {
     $pathArgs = @()
     if ($ValheimDir) { $pathArgs += "-p:ValheimDir=$ValheimDir" }
+    if ($ReferencePath) { $pathArgs += "-p:ReferencePath=$ReferencePath" }
     & dotnet build HeroRadialMenusMod.csproj -c Release @pathArgs
     if ($LASTEXITCODE -ne 0) { throw 'Release build failed.' }
-    & dotnet run --project tools/ProfileTests/ProfileTests.csproj -c Release @pathArgs
-    if ($LASTEXITCODE -ne 0) { throw 'Profile tests failed.' }
+    if ($ReferencePath) {
+        Write-Host 'Profile tests skipped: they need the real Unity runtime, not reference assemblies.'
+    } else {
+        & dotnet run --project tools/ProfileTests/ProfileTests.csproj -c Release @pathArgs
+        if ($LASTEXITCODE -ne 0) { throw 'Profile tests failed.' }
+    }
     & (Join-Path $PSScriptRoot 'Check-Release.ps1')
     [xml]$project = Get-Content -LiteralPath 'HeroRadialMenusMod.csproj' -Raw
     $version = $project.SelectSingleNode('//Version').InnerText
@@ -48,6 +57,8 @@ try {
     $hash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
     "$hash  $([IO.Path]::GetFileName($zip))" | Set-Content -LiteralPath "$zip.sha256" -Encoding ASCII
     Write-Host "Candidate: $zip"
+    # GitHub Actions: hand the ZIP path to the following steps.
+    if ($env:GITHUB_OUTPUT) { Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "zip=$zip" -Encoding utf8 }
     Write-Host "SHA256: $hash"
     Write-Host 'Archive contents verified. In-game release checks remain manual.'
 } finally { Pop-Location }

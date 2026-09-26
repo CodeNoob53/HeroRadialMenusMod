@@ -2,6 +2,9 @@
 bin/
 obj/
 *.dll
+# Reference assemblies (public API only, no game code) for CI builds;
+# regenerate with tools/Update-GameRefs.ps1 after a game update.
+!lib/*.dll
 *.pdb
 *.mdb
 *.user

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.1 — unpublished
+## 1.3.1 — 26-09-2026
 
 - Fixed: the mouse side buttons Mouse3 and Mouse4 could both register on a
   single press, so a wheel bound to Mouse4 opened the Mouse3 wheel instead.
