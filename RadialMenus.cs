@@ -1103,7 +1103,7 @@ namespace HeroRadialMenusMod
                 string name = Localization.instance != null
                     ? Localization.instance.Localize(it.m_shared.m_name)
                     : it.m_shared.m_name;
-                string activeTag = (_hoverIndex == _activeItemIndex) ? " (Активна)" : "";
+                string activeTag = (_hoverIndex == _activeItemIndex) ? GameText.ActiveTag : "";
                 string text = it.m_stack > 1 ? $"{name}{activeTag}  x{it.m_stack}" : $"{name}{activeTag}";
                 if (_centerLabel != null) _centerLabel.text = text;
             }
@@ -1473,7 +1473,7 @@ namespace HeroRadialMenusMod
             {
                 RebuildItems();
                 if (_items.Count == 0)
-                    _wheel.SetCustomCenterText("Немає хілок");
+                    _wheel.SetCustomCenterText(GameText.NoConsumables);
             }
         }
 
@@ -1510,7 +1510,7 @@ namespace HeroRadialMenusMod
 
             _wheel.SetActive(true);
             if (_items.Count == 0)
-                _wheel.SetCustomCenterText("Немає хілок");
+                _wheel.SetCustomCenterText(GameText.NoConsumables);
 
             if (Plugin.RadialSlowMotion.Value)
             {
@@ -1700,6 +1700,7 @@ namespace HeroRadialMenusMod
 
         private static bool  _keyHeld;
         private static float _holdTimer;
+        private static bool  _heldKeyHasGameAction;
         private static string? _lastHoldFailReason;
         private static KeyCode _activeKey = KeyCode.None;
 
@@ -1861,10 +1862,15 @@ namespace HeroRadialMenusMod
             {
                 _keyHeld   = true;
                 _holdTimer = 0f;
+                // Looked up once per press, so a rebind in the game's
+                // controls is picked up on the next press.
+                _heldKeyHasGameAction = GameKeyBindings.HasGameAction(heldKey);
             }
 
+            // The delay exists so a short press keeps the key's game action
+            // (R hides the weapon). A key the game does not use opens at once.
             _holdTimer += Time.unscaledDeltaTime;
-            if (_holdTimer < Plugin.ArrowRadialHoldDelay.Value) return;
+            if (_heldKeyHasGameAction && _holdTimer < Plugin.ArrowRadialHoldDelay.Value) return;
 
             if (!Plugin.CanUseHotkeys())
             {
@@ -1898,7 +1904,7 @@ namespace HeroRadialMenusMod
             _aim  = Vector2.zero;
             _wheel.SetActive(true);
             if (_items.Count == 0)
-                _wheel.SetCustomCenterText("Немає стріл");
+                _wheel.SetCustomCenterText(GameText.NoAmmo);
         }
 
         // Надійний пошук активного боєприпасу

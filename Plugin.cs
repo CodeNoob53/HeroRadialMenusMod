@@ -20,7 +20,7 @@ namespace HeroRadialMenusMod
     {
         public const string PluginGuid    = "com.heromod.valheim.radialmenus";
         public const string PluginName    = "Hero Radial Menus";
-        public const string PluginVersion = "1.2.0";
+        public const string PluginVersion = "1.3.0";
 
         internal static BepInEx.Logging.ManualLogSource Log { get; private set; } = null!;
 
@@ -248,8 +248,9 @@ namespace HeroRadialMenusMod
             ArrowRadialKeySecondary = Config.Bind("ArrowRadial", "KeySecondary", KeyCode.None,
                 "Додаткова/альтернативна клавіша меню вибору стріли (якщо не потрібна — None)");
             ArrowRadialHoldDelay = Config.Bind("ArrowRadial", "HoldDelay", 0.25f,
-                "Скільки секунд тримати клавішу, перш ніж відкриється меню — " +
-                "коротке натискання лишається ванільним 'сховати зброю'");
+                "Скільки секунд тримати клавішу, перш ніж відкриється меню. Діє лише для клавіші, " +
+                "яка має дію в керуванні гри (як R — сховати зброю), щоб коротке натискання її зберегло; " +
+                "вільна клавіша відкриває меню одразу");
             ArrowRadialPickDelay = Config.Bind("ArrowRadial", "PickDelay", 0.15f,
                 "Скільки секунд меню лишається на екрані після вибору стріли — " +
                 "щоб побачити, що саме застосувалось");

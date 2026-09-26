@@ -29,7 +29,9 @@ Record the .NET SDK, BepInEx and Valheim versions the build used.
 - [ ] ConsumeAnimation true/false; potion cooldown and full-stomach refusals.
 - [ ] Item stats window on both wheels: position, size, text, weight updates.
 - [ ] Arrow wheel: R short tap/hold, secondary key, remapping, incompatible
-      ammunition, hidden bow restored.
+      ammunition, hidden bow restored; a free key (Mouse4) opens without delay,
+      R rebound away from hide-weapon opens without delay.
+- [ ] Wheel labels with the game in English, Ukrainian and one other language.
 - [ ] Game cursor visible in both wheels and restored after closing; aiming
       matches the pointer with offsets and scale.
 - [ ] Inventory/chat/map/menu guards, death, teleport, world exit/rejoin;
@@ -43,7 +45,8 @@ Record the .NET SDK, BepInEx and Valheim versions the build used.
       if advertised.
 
 Known limits to state on the release page: mouse aiming only, up to 16 items
-per wheel, part of the in-game text is Ukrainian. SlowMotion is client-local
+per wheel; in languages other than English and Ukrainian the wheels' own
+labels borrow the game's wording from other contexts. SlowMotion is client-local
 and not tested with other time mods. Profile-hidden slots can still be
 selected.
 

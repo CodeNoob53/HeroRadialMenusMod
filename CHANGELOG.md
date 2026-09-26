@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 — unpublished
+
+- The wheels' own labels ("no items" messages, the "active" arrow tag) follow
+  the game language: own English and Ukrainian wording, the game's closest
+  translations for every other language.
+- The arrow wheel's HoldDelay applies only to a key that also has a game action
+  (like R); on a free key such as Mouse4 the wheel opens instantly.
+
 ## 1.2.0 — unpublished
 
 - Item stats window left of both wheels, matching the game's own radial menu:

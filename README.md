@@ -2,7 +2,7 @@
 
 **English** · [Українська](README.uk.md)
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
 ![Valheim](https://img.shields.io/badge/Valheim-1.0.15-orange)
 ![BepInEx](https://img.shields.io/badge/BepInEx-5.4.23-green)
 ![Client-side](https://img.shields.io/badge/side-client--only-lightgrey)
@@ -57,6 +57,9 @@ Plugin ID `com.heromod.valheim.radialmenus`.
 - **Live tracking.** Icons and stack counts always match your inventory.
 - **Optional eat/drink animation.** Turn it off for items used from the wheel;
   sound and all game rules stay.
+- **Follows the game language.** Item names and tooltips come from the game.
+  The wheels' few own labels have their own English and Ukrainian wording and
+  use the game's closest translations in every other language.
 - **Highly configurable.** Hotkeys, dead zone, movement lock, colours, sizes
   and more. Changes apply as soon as you save the config — no restart.
 
@@ -65,7 +68,7 @@ Plugin ID `com.heromod.valheim.radialmenus`.
 | Action | Default |
 |---|---|
 | Consumable wheel | Hold Mouse3 (a mouse side button) |
-| Arrow wheel | Hold R for 0.25 seconds with a bow equipped |
+| Arrow wheel | Hold R with a bow equipped |
 | Aim | Move the mouse toward a sector |
 | Use the selected item | Release the key |
 | Use several consumables | Left-click each slot; release the key to close |
@@ -75,10 +78,10 @@ Camera look and combat pause while a wheel is open; walking stays available
 unless `BlockMovement` is enabled. If your mouse has no side buttons, set
 `RadialKey` to any other key.
 
-The arrow wheel waits 0.25 seconds (`HoldDelay`) before opening only so that a
-short R press still hides your weapon. If you move the arrow wheel to a key the
-game does not use (`Key` or `KeySecondary`), set `HoldDelay = 0` and it opens
-instantly. The delay applies to both arrow wheel keys.
+On R the arrow wheel waits 0.25 seconds (`HoldDelay`) before opening, so a
+short press still hides your weapon. The delay applies only to keys that also
+do something in the game's controls: put the arrow wheel on a free key
+(`Key` or `KeySecondary`, for example Mouse4) and it opens instantly.
 
 ## Requirements
 
@@ -109,8 +112,6 @@ file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
 - Client-side only: works on any server, and the server does not need it.
 - Mouse only; controller sticks cannot aim the wheels.
 - Up to 16 different items per wheel.
-- Three short labels are in Ukrainian: the "no items" messages of the empty
-  wheels and the "active" tag next to the arrows currently loaded.
 - Normal game rules apply: potion cooldowns, full stomach, ammunition that
   fits the bow.
 - The experimental `SlowMotion` option is for single player only.
@@ -119,7 +120,7 @@ file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
 ## Troubleshooting
 
 - **The mod does not load.** Look in `BepInEx/LogOutput.log` for
-  `Hero Radial Menus 1.2.0` and any errors, and make sure there is only one copy
+  `Hero Radial Menus 1.3.0` and any errors, and make sure there is only one copy
   of the DLL.
 - **A wheel is misplaced or looks wrong.** Reset the config: close the game,
   rename the file and let the game create a new one with defaults.

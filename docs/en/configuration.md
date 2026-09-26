@@ -55,7 +55,7 @@ Consumable wheel controls and the shared look of both wheels.
 |---|---|---|
 | `Key` | `R` | Main key; None disables it. A short R press keeps the game's hide-weapon action. |
 | `KeySecondary` | `None` | Alternative key, for example Mouse4. None disables it. |
-| `HoldDelay` | `0.25` | Seconds to hold before the wheel opens; applies to both Key and KeySecondary. It exists so a short R press keeps hiding the weapon; if neither key has a game action (e.g. Mouse4), set 0 to open instantly. |
+| `HoldDelay` | `0.25` | Seconds to hold before the wheel opens. Applies only to a key that also has an action in the game's controls (like R, hide weapon), so a short press keeps that action; a free key (e.g. Mouse4) opens the wheel at once. Rebinding in the game's settings is taken into account. |
 | `PickDelay` | `0.15` | Seconds the wheel stays on screen after a pick; 0 closes it on the next update. Controls already return to the player during this time. Use a non-negative number. |
 | `OffsetX` | `0` | Offset from the HUD centre; positive is right, negative is left. |
 | `OffsetY` | `0` | Offset: positive is up, negative is down. |

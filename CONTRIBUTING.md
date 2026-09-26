@@ -52,6 +52,7 @@ rendering, Harmony hooks, input or actual item actions in-game.
 | Patches.cs | Harmony HUD updates, input suppression, eat-animation suppression, death/scene cleanup |
 | RadialMenus.cs | Sprite lookup, procedural mesh/slots, click feedback, shared wheel and both state machines |
 | ItemInfoPanel.cs | Item stats window, cloned from the game's radial InventoryInfo |
+| GameText.cs | Wheel labels (own EN/UK text, game localization keys for other languages); detection of keys bound in the game's controls (arrow HoldDelay) |
 | LayerProfile.cs | Per-surface file cache and property resolution/application |
 | NodeBaseline.cs | Capture/restore of static UI properties |
 | DynamicOverride.cs | Combining live visibility/colour with profiles |
