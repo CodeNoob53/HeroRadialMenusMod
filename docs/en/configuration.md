@@ -9,7 +9,7 @@ after you save (the log shows "CFG перечитано з диска."). The ex
 wheel positions (`HealOffsetX/Y`, `[ArrowRadial] OffsetX/Y`): they apply when a
 world loads, so rejoin the world or restart the game after changing them.
 
-The tables list all 37 settings. Do not translate section or key names. Write
+The tables list all 38 settings. Do not translate section or key names. Write
 decimals with a dot: 0.25, not 0,25. Booleans are true / false. RGB colours
 and opacity are 0..1; alpha 0 is transparent, 1 is opaque. Sizes are HUD
 units; the game's UI scale can change their physical size on screen.
@@ -21,6 +21,7 @@ Consumable wheel controls and the shared look of both wheels.
 | Key | Default | Effect |
 |---|---|---|
 | `RadialKey` | `Mouse3` | Hold to open the consumable wheel. A Unity KeyCode name such as G, Mouse3, Mouse4; None disables the key. |
+| `RadialKeySecondary` | `None` | Second key that also opens the consumable wheel (hold), for example Mouse4 or G. The wheel closes when the key that opened it is released. None disables it. |
 | `IncludeAllConsumables` | `false` | false: food with a health value and consumables with a status effect (potions, meads); true: every consumable. It is not a "healing only" filter. |
 | `Radius` | `320` | Base radial distance. Values below 200 use 320. Inner edge: Radius − 86, outer edge: Radius + 94, icon centres: Radius + 4. |
 | `SlotSize` | `68` | Icon width and height, minimum 1. Does not change the sectors or the stack count text. |

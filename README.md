@@ -2,7 +2,7 @@
 
 **English** · [Українська](README.uk.md)
 
-![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![Version](https://img.shields.io/badge/version-1.3.1-blue)
 ![Valheim](https://img.shields.io/badge/Valheim-1.0.15-orange)
 ![BepInEx](https://img.shields.io/badge/BepInEx-5.4.23-green)
 ![Client-side](https://img.shields.io/badge/side-client--only-lightgrey)
@@ -67,7 +67,7 @@ Plugin ID `com.heromod.valheim.radialmenus`.
 
 | Action | Default |
 |---|---|
-| Consumable wheel | Hold Mouse3 (a mouse side button) |
+| Consumable wheel | Hold Mouse3 (a mouse side button); a second key can be set with `RadialKeySecondary` |
 | Arrow wheel | Hold R with a bow equipped |
 | Aim | Move the mouse toward a sector |
 | Use the selected item | Release the key |
@@ -76,7 +76,8 @@ Plugin ID `com.heromod.valheim.radialmenus`.
 
 Camera look and combat pause while a wheel is open; walking stays available
 unless `BlockMovement` is enabled. If your mouse has no side buttons, set
-`RadialKey` to any other key.
+`RadialKey` to any other key. Each wheel has a main and a secondary key; the
+wheel closes when the key that opened it is released.
 
 On R the arrow wheel waits 0.25 seconds (`HoldDelay`) before opening, so a
 short press still hides your weapon. The delay applies only to keys that also
@@ -103,7 +104,7 @@ With a mod manager, use its profile's BepInEx folder.
 ## Configuration
 
 The [complete settings reference](docs/en/configuration.md) lists
-**all 37 settings**, their defaults and examples. Changes apply as soon as the
+**all 38 settings**, their defaults and examples. Changes apply as soon as the
 file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
 `[ArrowRadial] OffsetX/Y`) apply on the next world load.
 
@@ -120,7 +121,7 @@ file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
 ## Troubleshooting
 
 - **The mod does not load.** Look in `BepInEx/LogOutput.log` for
-  `Hero Radial Menus 1.3.0` and any errors, and make sure there is only one copy
+  `Hero Radial Menus 1.3.1` and any errors, and make sure there is only one copy
   of the DLL.
 - **A wheel is misplaced or looks wrong.** Reset the config: close the game,
   rename the file and let the game create a new one with defaults.

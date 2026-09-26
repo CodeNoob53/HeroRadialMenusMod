@@ -1,7 +1,16 @@
 # Changelog
 
+## 1.3.1 — unpublished
+
+- Fixed: the mouse side buttons Mouse3 and Mouse4 could both register on a
+  single press, so a wheel bound to Mouse4 opened the Mouse3 wheel instead.
+- Fixed: a free mouse side button counted as bound in the game's controls, so
+  the arrow wheel still waited HoldDelay on it.
+
 ## 1.3.0 — unpublished
 
+- RadialKeySecondary: a second key for the consumable wheel, like the arrow
+  wheel's KeySecondary.
 - The wheels' own labels ("no items" messages, the "active" arrow tag) follow
   the game language: own English and Ukrainian wording, the game's closest
   translations for every other language.

@@ -1401,13 +1401,18 @@ namespace HeroRadialMenusMod
             // never move under the player's aim mid-interaction.
             _wheel.PollProfile(Plugin.Log, _open);
 
-            var key = Plugin.RadialKey.Value;
-
+            // Either key opens the wheel; the one that opened it closes it.
             if (!_open && Plugin.CanUseHotkeys() && !ArrowRadial.IsOpen)
             {
-                if (key != KeyCode.None && Plugin.KeyPressed(key))
+                var key1 = Plugin.RadialKey.Value;
+                var key2 = Plugin.RadialKeySecondary.Value;
+                KeyCode pressed = KeyCode.None;
+                if (key1 != KeyCode.None && Plugin.KeyPressed(key1)) pressed = key1;
+                else if (key2 != KeyCode.None && Plugin.KeyPressed(key2)) pressed = key2;
+
+                if (pressed != KeyCode.None)
                 {
-                    _activeKey = key;
+                    _activeKey = pressed;
                     Open();
                 }
             }

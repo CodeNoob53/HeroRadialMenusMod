@@ -20,12 +20,13 @@ namespace HeroRadialMenusMod
     {
         public const string PluginGuid    = "com.heromod.valheim.radialmenus";
         public const string PluginName    = "Hero Radial Menus";
-        public const string PluginVersion = "1.3.0";
+        public const string PluginVersion = "1.3.1";
 
         internal static BepInEx.Logging.ManualLogSource Log { get; private set; } = null!;
 
         // --- Quick-heal wheel -------------------------------------------------
         public static ConfigEntry<KeyCode> RadialKey { get; private set; } = null!;
+        public static ConfigEntry<KeyCode> RadialKeySecondary { get; private set; } = null!;
         public static ConfigEntry<bool>  RadialIncludeAllConsumables { get; private set; } = null!;
         public static ConfigEntry<float> RadialRadius { get; private set; } = null!;
         public static ConfigEntry<float> RadialSlotSize { get; private set; } = null!;
@@ -183,6 +184,8 @@ namespace HeroRadialMenusMod
             // Mouse3 is a side button and is free in Valheim.
             RadialKey = Config.Bind("Radial", "RadialKey", KeyCode.Mouse3,
                 "Основна клавіша радіального меню хілок (тримати). За замовчуванням Mouse3 (задня бокова кнопка миші)");
+            RadialKeySecondary = Config.Bind("Radial", "RadialKeySecondary", KeyCode.None,
+                "Додаткова клавіша меню хілок (тримати), наприклад Mouse4 або G. None — вимкнено");
             RadialIncludeAllConsumables = Config.Bind("Radial", "IncludeAllConsumables", false,
                 "true — усі консумабли; false — їжа та консумабли зі статус-ефектом (зілля, медовуха)");
             RadialRadius = Config.Bind("Radial", "Radius", 320f, "Радіус кола в пікселях");
@@ -288,11 +291,27 @@ namespace HeroRadialMenusMod
             }
         }
 
+        /// <summary>
+        /// The two input sources number the mouse side buttons the opposite
+        /// way round. Unity's legacy Input calls the back button Mouse3 and the
+        /// forward button Mouse4; ZInput maps Mouse3 to MouseButton.Forward and
+        /// Mouse4 to MouseButton.Back. Reading both unmodified made one press
+        /// report both keys — forward opened the Mouse3 wheel while the Mouse4
+        /// one was meant. Every KeyCode in this mod follows the legacy meaning
+        /// (Mouse3 = back), so ZInput is asked for the swapped code.
+        /// </summary>
+        internal static KeyCode ToZInputKey(KeyCode key) => key switch
+        {
+            KeyCode.Mouse3 => KeyCode.Mouse4,
+            KeyCode.Mouse4 => KeyCode.Mouse3,
+            _ => key,
+        };
+
         public static bool KeyHeld(KeyCode key)
         {
             bool legacy = false, zin = false;
             try { legacy = Input.GetKey(key); } catch { }
-            try { zin = ZInput.GetKey(key, false); } catch { }
+            try { zin = ZInput.GetKey(ToZInputKey(key), false); } catch { }
 
             if (legacy || zin)
                 LogInputOnce($"KeyHeld({key}): Input={legacy}, ZInput={zin}");
@@ -303,7 +322,7 @@ namespace HeroRadialMenusMod
         {
             bool legacy = false, zin = false;
             try { legacy = Input.GetKeyDown(key); } catch { }
-            try { zin = ZInput.GetKeyDown(key, false); } catch { }
+            try { zin = ZInput.GetKeyDown(ToZInputKey(key), false); } catch { }
 
             if (legacy || zin)
                 LogInputOnce($"KeyPressed({key}): Input={legacy}, ZInput={zin}");
@@ -314,7 +333,7 @@ namespace HeroRadialMenusMod
         {
             bool legacy = false, zin = false;
             try { legacy = Input.GetKeyUp(key); } catch { }
-            try { zin = ZInput.GetKeyUp(key, false); } catch { }
+            try { zin = ZInput.GetKeyUp(ToZInputKey(key), false); } catch { }
 
             if (legacy || zin)
                 LogInputOnce($"KeyReleased({key}): Input={legacy}, ZInput={zin}");

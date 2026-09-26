@@ -67,6 +67,18 @@ namespace HeroRadialMenusMod
             AccessTools.Method(typeof(ZInput), "KeyCodeToPath", new[] { typeof(KeyCode), typeof(bool) });
         private static bool _failureLogged;
 
+        // ZInput registers every mouse button, Tab and Left Shift a second time
+        // under a raw name so game code can ask "is mouse button N down". Those
+        // entries are not actions: the real ones (Attack, Block, Inventory,
+        // Run…) have their own entries. Ignoring the raw names keeps a free
+        // side button from looking bound to "MouseForward".
+        private static readonly System.Collections.Generic.HashSet<string> RawAliases =
+            new System.Collections.Generic.HashSet<string>
+            {
+                "MouseLeft", "MouseRight", "MouseMiddle", "MouseForward", "MouseBack",
+                "Tab", "LShift",
+            };
+
         public static bool HasGameAction(KeyCode key)
         {
             if (key == KeyCode.None) return false;
@@ -76,7 +88,8 @@ namespace HeroRadialMenusMod
                 if (input == null || ButtonsField == null || KeyCodeToPathMethod == null)
                     return LogFailure("ZInput недоступний");
 
-                var path = KeyCodeToPathMethod.Invoke(null, new object[] { key, false }) as string;
+                // Same Mouse3/Mouse4 numbering as the key reads; see Plugin.ToZInputKey.
+                var path = KeyCodeToPathMethod.Invoke(null, new object[] { Plugin.ToZInputKey(key), false }) as string;
                 if (string.IsNullOrEmpty(path)) return LogFailure($"немає шляху для {key}");
 
                 if (!(ButtonsField.GetValue(input) is IDictionary buttons))
@@ -85,6 +98,7 @@ namespace HeroRadialMenusMod
                 foreach (var value in buttons.Values)
                 {
                     if (!(value is ZInput.ButtonDef def)) continue;
+                    if (RawAliases.Contains(def.Name)) continue;
                     string? bound;
                     try { bound = def.GetActionPath(); }
                     catch { continue; } // an action without bindings
