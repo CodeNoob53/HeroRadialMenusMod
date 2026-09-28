@@ -9,7 +9,7 @@ after you save (the log shows "CFG перечитано з диска."). The ex
 wheel positions (`HealOffsetX/Y`, `[ArrowRadial] OffsetX/Y`): they apply when a
 world loads, so rejoin the world or restart the game after changing them.
 
-The tables list all 38 settings. Do not translate section or key names. Write
+The tables list all 39 settings. Do not translate section or key names. Write
 decimals with a dot: 0.25, not 0,25. Booleans are true / false. RGB colours
 and opacity are 0..1; alpha 0 is transparent, 1 is opaque. Sizes are HUD
 units; the game's UI scale can change their physical size on screen.
@@ -45,6 +45,7 @@ Consumable wheel controls and the shared look of both wheels.
 | `ClickToUse` | `true` | Clicking a slot with ClickKey uses the item at once and keeps the wheel open, so several items can be used in one opening. When a stack runs out, the sectors are rebuilt. After at least one click, releasing RadialKey only closes the wheel. false: items are used only on releasing RadialKey. |
 | `ClickKey` | `Mouse0` | Key for ClickToUse (Unity KeyCode). Must differ from RadialKey; None disables clicking. |
 | `ConsumeAnimation` | `true` | The game's eat/drink animation when using an item from the wheel. false: the item is used without the animation; the consume sound and game rules (potion cooldown, full stomach) stay. |
+| `EffectHighlight` | `true` | Colour consumable icons by what they restore: a glow behind the icon in the colour of the main effect — red health, yellow stamina, blue eitr. Food with balanced stats (e.g. Wolf Jerky, 33 health / 33 stamina) gets a glow split left to right between those colours. Resistance meads stay uncoloured. |
 | `ShowItemInfo` | `true` | Stats window for the hovered item, left of the wheel, as in the game's own radial menu: armour, carry weight, item name and tooltip. It looks exactly like the game's window; applies to both wheels. |
 | `ItemInfoScale` | `1` | Scale of the stats window, clamped to 0.3..3. |
 | `ItemInfoOffsetX` | `0` | Extra X offset from the default place (40 units left of the sectors' outer edge); negative moves it left. |

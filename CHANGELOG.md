@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0 — unpublished
+
+- EffectHighlight: consumable icons glow in the colour of what they restore
+  (red health, yellow stamina, blue eitr); balanced food such as Wolf Jerky
+  gets a glow split between its colours.
+
 ## 1.3.1 — 26-09-2026
 
 - Fixed: the mouse side buttons Mouse3 and Mouse4 could both register on a

@@ -47,6 +47,32 @@ namespace HeroRadialMenusMod
             }
         }
 
+        private static Sprite? _whiteGlow;
+        private static readonly Dictionary<string, Sprite> _splitGlows = new Dictionary<string, Sprite>();
+
+        /// <summary>Soft white glow, tinted per use (single effect colour).</summary>
+        public static Sprite WhiteGlow => _whiteGlow ??= CreateGlowSprite(Color.white, 1f);
+
+        /// <summary>
+        /// Soft glow split left to right between the given colours, for items
+        /// with balanced effects. Baked per colour combination and cached —
+        /// there are only a handful.
+        /// </summary>
+        public static Sprite SplitGlow(Color[] colors, int count)
+        {
+            var key = new System.Text.StringBuilder();
+            for (int i = 0; i < count; i++) key.Append(ColorUtility.ToHtmlStringRGB(colors[i]));
+            string k = key.ToString();
+            if (!_splitGlows.TryGetValue(k, out var sprite))
+            {
+                var stops = new Color[count];
+                System.Array.Copy(colors, stops, count);
+                sprite = CreateSplitGlowSprite(stops);
+                _splitGlows[k] = sprite;
+            }
+            return sprite;
+        }
+
         public static void EnsureLoaded()
         {
             if (_loaded && _highlighter != null && _indicator != null) return;
@@ -159,7 +185,11 @@ namespace HeroRadialMenusMod
 
         // Створює круглу м'яку підкладку світло-голубого кольору з радіальним градієнтом
         // (у центрі світло-голубий, з краю прозорий) як в оригіналі для активного предмета
-        private static Sprite CreateRadialGlowSprite()
+        private static Sprite CreateRadialGlowSprite() =>
+            CreateGlowSprite(new Color(0.40f, 0.75f, 1.0f), 0.85f);
+
+        // Кругла м'яка пляма заданого кольору: у центрі непрозора, до краю зникає.
+        private static Sprite CreateGlowSprite(Color color, float peakAlpha)
         {
             const int size = 64;
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
@@ -185,8 +215,43 @@ namespace HeroRadialMenusMod
                     {
                         float falloff = 1f - dist;
                         float alpha = falloff * falloff;
-                        pixels[y * size + x] = new Color(0.40f, 0.75f, 1.0f, alpha * 0.85f);
+                        pixels[y * size + x] = new Color(color.r, color.g, color.b, alpha * peakAlpha);
                     }
+                }
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f));
+        }
+
+        // М'яка пляма, як CreateGlowSprite, але колір переходить зліва направо між
+        // кількома кольорами. Перехід стиснутий до середини (smoothstep), тож
+        // половини читаються як два окремі кольори, а не одна змішана пляма.
+        private static Sprite CreateSplitGlowSprite(Color[] stops)
+        {
+            const int size = 64;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            tex.wrapMode = TextureWrapMode.Clamp;
+            tex.filterMode = FilterMode.Bilinear;
+
+            var pixels = new Color[size * size];
+            float center = (size - 1) * 0.5f;
+            int segments = stops.Length - 1;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x - center) / center;
+                    float dy = (y - center) / center;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (dist >= 1f) { pixels[y * size + x] = Color.clear; continue; }
+
+                    float u = (float)x / (size - 1) * segments;
+                    int seg = Mathf.Min((int)u, segments - 1);
+                    float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((u - seg - 0.3f) / 0.4f));
+                    var c = Color.Lerp(stops[seg], stops[seg + 1], t);
+                    float falloff = 1f - dist;
+                    pixels[y * size + x] = new Color(c.r, c.g, c.b, falloff * falloff);
                 }
             }
             tex.SetPixels(pixels);
@@ -431,6 +496,14 @@ namespace HeroRadialMenusMod
         private Vector2 _baseDir;
         private float _midRadius;
 
+        // Effect highlight: a glow behind the icon in the colour of what the
+        // item restores, split between colours for balanced food.
+        private Image? _effectGlow;
+        private readonly Color[] _effectColors = new Color[3];
+        private ItemDrop.ItemData.SharedData? _effectShared;
+        private bool _effectShown;
+        private const float EffectGlowAlpha = 0.55f;
+
         public GameObject? Root => _root;
 
         public void Init(GameObject parent, int index)
@@ -457,6 +530,19 @@ namespace HeroRadialMenusMod
             _activeBadgeImg.color = Color.white;
             _activeBadgeImg.raycastTarget = false;
             _activeBadgeObj.SetActive(false);
+
+            // Сяйво кольору головного ефекту (здоров'я / витривалість / ейтр)
+            var glowObj = new GameObject("EffectGlow");
+            glowObj.transform.SetParent(_root.transform, false);
+            var glowRect = glowObj.AddComponent<RectTransform>();
+            glowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRect.pivot     = new Vector2(0.5f, 0.5f);
+            glowRect.sizeDelta = new Vector2(100f, 100f);
+            _effectGlow = glowObj.AddComponent<Image>();
+            _effectGlow.sprite = VanillaRadialSprites.WhiteGlow;
+            _effectGlow.raycastTarget = false;
+            glowObj.SetActive(false);
 
             // Більша іконка предмета (80x80)
             var iconObj = new GameObject("Icon");
@@ -515,6 +601,36 @@ namespace HeroRadialMenusMod
             outline.effectDistance = new Vector2(1.5f, -1.5f);
         }
 
+        /// <summary>
+        /// Colour the slot by what the item restores. Recomputed only when the
+        /// slot shows a different item type, since Bind runs every frame.
+        /// </summary>
+        private void UpdateEffectHighlight(ItemDrop.ItemData? item)
+        {
+            bool enabled = Plugin.RadialEffectHighlight.Value;
+            var shared = item?.m_shared;
+            if (enabled == _effectShown && ReferenceEquals(shared, _effectShared)) return;
+            _effectShared = shared;
+            _effectShown = enabled;
+
+            var effects = enabled ? ItemEffects.Of(item) : default;
+            int n = effects.GetMainColors(_effectColors);
+            if (_effectGlow == null) return;
+            _effectGlow.gameObject.SetActive(n > 0);
+            if (n == 1)
+            {
+                var c = _effectColors[0];
+                _effectGlow.sprite = VanillaRadialSprites.WhiteGlow;
+                _effectGlow.color = new Color(c.r, c.g, c.b, EffectGlowAlpha);
+            }
+            else if (n > 1)
+            {
+                // The colours are baked into the sprite; the tint only fades it.
+                _effectGlow.sprite = VanillaRadialSprites.SplitGlow(_effectColors, n);
+                _effectGlow.color = new Color(1f, 1f, 1f, EffectGlowAlpha);
+            }
+        }
+
         public void SetLayout(Vector2 dir, float midRadius)
         {
             _baseDir = dir;
@@ -559,6 +675,8 @@ namespace HeroRadialMenusMod
                 _icon.sprite = item.GetIcon();
                 _icon.color = Color.white;
             }
+
+            UpdateEffectHighlight(item);
 
             if (_stackText != null)
             {

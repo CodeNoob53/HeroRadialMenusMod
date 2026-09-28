@@ -20,7 +20,7 @@ namespace HeroRadialMenusMod
     {
         public const string PluginGuid    = "com.heromod.valheim.radialmenus";
         public const string PluginName    = "Hero Radial Menus";
-        public const string PluginVersion = "1.3.1";
+        public const string PluginVersion = "1.4.0";
 
         internal static BepInEx.Logging.ManualLogSource Log { get; private set; } = null!;
 
@@ -51,6 +51,7 @@ namespace HeroRadialMenusMod
         public static ConfigEntry<KeyCode> RadialClickKey { get; private set; } = null!;
         public static ConfigEntry<bool>    RadialConsumeAnimation { get; private set; } = null!;
         public static ConfigEntry<bool>    ShowItemInfo { get; private set; } = null!;
+        public static ConfigEntry<bool>    RadialEffectHighlight { get; private set; } = null!;
         public static ConfigEntry<float>   ItemInfoScale { get; private set; } = null!;
         public static ConfigEntry<float>   ItemInfoOffsetX { get; private set; } = null!;
         public static ConfigEntry<float>   ItemInfoOffsetY { get; private set; } = null!;
@@ -63,8 +64,7 @@ namespace HeroRadialMenusMod
         public static ConfigEntry<float>   ArrowRadialOffsetX { get; private set; } = null!;
         public static ConfigEntry<float>   ArrowRadialOffsetY { get; private set; } = null!;
 
-        // Position of the heal wheel. Kept in [Position] under the same key
-        // names the old config used, so migration is a straight copy.
+        // Position of the heal wheel.
         public static ConfigEntry<float> HealOffsetX { get; private set; } = null!;
         public static ConfigEntry<float> HealOffsetY { get; private set; } = null!;
 
@@ -234,6 +234,9 @@ namespace HeroRadialMenusMod
             RadialConsumeAnimation = Config.Bind("Radial", "ConsumeAnimation", true,
                 "Програвати ванільну анімацію вживання (пиття/їжі) при застосуванні з колеса. " +
                 "false — предмет застосовується без анімації; звук і ефект вживання лишаються");
+            RadialEffectHighlight = Config.Bind("Radial", "EffectHighlight", true,
+                "Підсвічувати іконки консумаблів кольором ефекту: червоний — здоров'я, жовтий — " +
+                "витривалість, синій — ейтр. Збалансована їжа отримує сяйво, розділене між її кольорами");
             ShowItemInfo = Config.Bind("Radial", "ShowItemInfo", true,
                 "Показувати ліворуч від колеса вікно статів предмета під курсором, як у ванільному " +
                 "радіальному меню (броня, вага, назва й опис). Діє на обидва колеса");

@@ -31,6 +31,8 @@ CONTRIBUTING.md); the CHANGELOG heading must carry the release date, not
       use; click-to-use of several items; gold/red click feedback; stack
       running out mid-opening.
 - [ ] ConsumeAnimation true/false; potion cooldown and full-stomach refusals.
+- [ ] EffectHighlight: health/stamina/eitr meads, split glow on balanced food
+      (Wolf Jerky, Magecap), resistance meads uncoloured; arrow wheel unaffected.
 - [ ] Item stats window on both wheels: position, size, text, weight updates.
 - [ ] Arrow wheel: R short tap/hold, secondary key, remapping, incompatible
       ammunition, hidden bow restored; a free key (Mouse4) opens without delay,

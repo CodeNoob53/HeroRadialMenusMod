@@ -2,7 +2,7 @@
 
 **English** · [Українська](README.uk.md)
 
-![Version](https://img.shields.io/badge/version-1.3.1-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![Valheim](https://img.shields.io/badge/Valheim-1.0.16-orange)
 ![BepInEx](https://img.shields.io/badge/BepInEx-5.4.23-green)
 ![Client-side](https://img.shields.io/badge/side-client--only-lightgrey)
@@ -48,6 +48,9 @@ Plugin ID `com.heromod.valheim.radialmenus`.
 - **Use several at once.** Click slots to drink a health and a stamina mead in
   one opening. A used slot dips like a button and flashes gold; if the game
   refuses (effect still active, too full to eat) it flashes red.
+- **Colour-coded effects.** Each consumable glows in the colour of what it
+  restores — red health, yellow stamina, blue eitr. Balanced food, such as
+  Wolf Jerky, gets a glow split between its colours.
 - **Item stats at a glance.** A window left of the wheel shows the hovered
   item's full tooltip plus your armour and carry weight — the same window the
   game's radial menu uses.
@@ -104,7 +107,7 @@ With a mod manager, use its profile's BepInEx folder.
 ## Configuration
 
 The [complete settings reference](docs/en/configuration.md) lists
-**all 38 settings**, their defaults and examples. Changes apply as soon as the
+**all 39 settings**, their defaults and examples. Changes apply as soon as the
 file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
 `[ArrowRadial] OffsetX/Y`) apply on the next world load.
 
@@ -121,7 +124,7 @@ file is saved, even in-game; the wheel positions (`HealOffsetX/Y`,
 ## Troubleshooting
 
 - **The mod does not load.** Look in `BepInEx/LogOutput.log` for
-  `Hero Radial Menus 1.3.1` and any errors, and make sure there is only one copy
+  `Hero Radial Menus 1.4.0` and any errors, and make sure there is only one copy
   of the DLL.
 - **A wheel is misplaced or looks wrong.** Reset the config: close the game,
   rename the file and let the game create a new one with defaults.
