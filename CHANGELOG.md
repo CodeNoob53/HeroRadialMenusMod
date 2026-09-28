@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0 — unpublished
+## 1.4.0 — 28-09-2026
 
 - EffectHighlight: consumable icons glow in the colour of what they restore
   (red health, yellow stamina, blue eitr); balanced food such as Wolf Jerky
